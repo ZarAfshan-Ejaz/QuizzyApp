@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/studyFragment">
+    <fragment
+        android:id="@+id/splashFragment"
+        android:name="com.codingstuff.quizzyapp.views.SplashFragment"
+        android:label="fragment_splash"
+        tools:layout="@layout/fragment_splash" >
+        <action
+            android:id="@+id/action_splashFragment_to_signUpFragment"
+            app:destination="@id/signUpFragment" />
+        <action
+            android:id="@+id/action_splashFragment_to_listFragment"
+            app:destination="@id/listFragment" />
+        <action
+            android:id="@+id/action_splashFragment_to_signInFragment"
+            app:destination="@id/signInFragment" />
+        <action
+            android:id="@+id/action_splashFragment_to_studyFragment2"
+            app:destination="@id/studyFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/signUpFragment"
+        android:name="com.codingstuff.quizzyapp.views.SignUpFragment"
+        android:label="fragment_sign_up"
+        tools:layout="@layout/fragment_sign_up" >
+        <action
+            android:id="@+id/action_signUpFragment_to_signInFragment"
+            app:destination="@id/signInFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/signInFragment"
+        android:name="com.codingstuff.quizzyapp.views.SignInFragment"
+        android:label="SignInFragment"
+        tools:layout="@layout/fragment_sign_in">
+        <action
+            android:id="@+id/action_signInFragment_to_signUpFragment"
+            app:destination="@id/signUpFragment" />
+        <action
+            android:id="@+id/action_signInFragment_to_listFragment"
+            app:destination="@id/listFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/listFragment"
+        android:name="com.codingstuff.quizzyapp.views.ListFragment"
+        android:label="fragment_list"
+        tools:layout="@layout/fragment_list" >
+        <action
+            android:id="@+id/action_listFragment_to_detailFragment"
+            app:destination="@id/detailFragment" />
+        <action
+            android:id="@+id/quizList_to_profile"
+            app:destination="@id/profileFragment" />
+        <action
+            android:id="@+id/action_listFragment_to_studyFragment"
+            app:destination="@id/studyFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/studyFragment"
+        android:name="com.codingstuff.quizzyapp.views.StudyFragment"
+        android:label="fragment_study"
+        tools:layout="@layout/fragment_study" >
+        <action
+            android:id="@+id/action_studyFragment_to_quizFragment"
+            app:destination="@id/quizFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/detailFragment"
+        android:name="com.codingstuff.quizzyapp.views.DetailFragment"
+        android:label="fragment_detail"
+        tools:layout="@layout/fragment_detail" >
+        <action
+            android:id="@+id/action_detailFragment_to_quizragment"
+            app:destination="@id/quizragment" />
+        <argument
+            android:name="position"
+            app:argType="integer"
+            android:defaultValue="0" />
+    </fragment>
+    <fragment
+        android:id="@+id/quizragment"
+        android:name="com.codingstuff.quizzyapp.views.Quizragment"
+        android:label="fragment_quiz"
+        tools:layout="@layout/fragment_quiz" >
+        <action
+            android:id="@+id/action_quizragment_to_resultFragment"
+            app:destination="@id/resultFragment" />
+        <argument
+            android:name="quizId"
+            app:argType="string"
+            android:defaultValue="null" />
+        <argument
+            android:name="totalQueCount"
+            app:argType="long"
+            android:defaultValue="0L" />
+        <action
+            android:id="@+id/action_quizragment_to_listFragment"
+            app:destination="@id/listFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/resultFragment"
+        android:name="com.codingstuff.quizzyapp.views.ResultFragment"
+        android:label="fragment_result"
+        tools:layout="@layout/fragment_result" >
+        <action
+            android:id="@+id/action_resultFragment_to_listFragment"
+            app:destination="@id/listFragment" />
+        <argument
+            android:name="quizId"
+            app:argType="string"
+            android:defaultValue="null" />
+    </fragment>
+    <fragment
+        android:id="@+id/profileFragment"
+        android:name="com.codingstuff.quizzyapp.views.ProfileFragment"
+        android:label="fragment_profile"
+        tools:layout="@layout/fragment_profile" >
+        <action
+            android:id="@+id/action_profileFragment_to_signUpFragment"
+            app:destination="@id/signUpFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/statsFragment"
+        android:name="com.codingstuff.quizzyapp.views.statsFragment"
+        android:label="fragment_stats"
+        tools:layout="@layout/fragment_stats" />
+    <fragment
+        android:id="@+id/reviewFragment"
+        android:name="com.codingstuff.quizzyapp.views.ReviewFragment"
+        android:label="fragment_review"
+        tools:layout="@layout/fragment_review" />
+    <fragment
+        android:id="@+id/settingFragment"
+        android:name="com.codingstuff.quizzyapp.views.SettingFragment"
+        android:label="fragment_setting"
+        tools:layout="@layout/fragment_setting" >
+        <action
+            android:id="@+id/action_settingFragment_to_appPreferencesFragment"
+            app:destination="@id/appPreferencesFragment" />
+        <action
+            android:id="@+id/action_settingFragment_to_studyReminderFragment"
+            app:destination="@id/studyReminderFragment" />
+        <action
+            android:id="@+id/action_settingFragment_to_aboutFragment"
+            app:destination="@id/aboutFragment" />
+        <action
+            android:id="@+id/action_settingFragment_to_helpFragment"
+            app:destination="@id/helpFragment" />
+        <action
+            android:id="@+id/action_settingFragment_to_examSettingFragment"
+            app:destination="@id/examSettingFragment" />
+        <action
+            android:id="@+id/action_settingFragment_to_switchExamDialogFragment"
+            app:destination="@id/switchExamDialogFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/appPreferencesFragment"
+        android:name="com.codingstuff.quizzyapp.views.AppPreferencesFragment"
+        android:label="fragment_app_preferences"
+        tools:layout="@layout/fragment_app_preferences" />
+    <fragment
+        android:id="@+id/studyReminderFragment"
+        android:name="com.codingstuff.quizzyapp.views.StudyReminderFragment"
+        android:label="fragment_study_reminder"
+        tools:layout="@layout/fragment_study_reminder" />
+    <fragment
+        android:id="@+id/quizFragment"
+        android:name="com.codingstuff.quizzyapp.views.QuizFragment"
+        android:label="fragment_quiz2"
+        tools:layout="@layout/fragment_quiz2" />
+    <fragment
+        android:id="@+id/helpFragment"
+        android:name="com.codingstuff.quizzyapp.views.HelpFragment"
+        android:label="fragment_help"
+        tools:layout="@layout/fragment_help" />
+    <fragment
+        android:id="@+id/aboutFragment"
+        android:name="com.codingstuff.quizzyapp.views.AboutFragment"
+        android:label="fragment_about"
+        tools:layout="@layout/fragment_about" />
+    <fragment
+        android:id="@+id/examSettingFragment"
+        android:name="com.codingstuff.quizzyapp.views.ExamSettingFragment"
+        android:label="fragment_exam_settings"
+        tools:layout="@layout/fragment_exam_settings" />
+    <dialog
+        android:id="@+id/switchExamDialogFragment"
+        android:name="com.codingstuff.quizzyapp.ui.dialogs.SwitchExamDialogFragment"
+        android:label="switch_exam_dialog_fragment"
+        tools:layout="@layout/switch_exam_dialog_fragment" />
+</navigation>
