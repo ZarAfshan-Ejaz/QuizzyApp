@@ -68,7 +68,7 @@ class QuizFragment : Fragment() {
             return fragment
         }
     }
-    //real time quizzes
+    //real time quizz
     fun getQuiz(){
         val firestore = FirebaseFirestore.getInstance()
         val collectionPath = "/Exams/CEReGwH8PMG8zXVQqP3B/ComputerScience/Ay8RWesFncvEBVmuIAx0/Questions"
