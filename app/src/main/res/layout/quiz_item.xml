@@ -91,15 +91,8 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:src="@drawable/right_mark"
-                        android:visibility="visible" />
-
-                    <ImageView
-                        android:id="@+id/img_close_op_a"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:src="@drawable/close"
                         android:visibility="gone" />
+
 
                 </LinearLayout>
 
@@ -109,7 +102,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="10dp"
                     android:orientation="horizontal"
-                    android:visibility="visible">
+                    android:visibility="gone">
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -125,28 +118,6 @@
 
                 </LinearLayout>
 
-                <LinearLayout
-                    android:id="@+id/ll_op_a_exp_hide"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
-                    android:orientation="horizontal"
-                    android:visibility="gone">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Hide Explanation"
-                        android:textColor="@color/blue_font"
-                        android:textSize="18sp" />
-
-                    <ImageView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:src="@drawable/drop_down_arrow" />
-
-
-                </LinearLayout>
 
                 <TextView
                     android:id="@+id/tv_correct_ans_a"
@@ -193,15 +164,8 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:src="@drawable/right_mark"
-                        android:visibility="visible" />
-
-                    <ImageView
-                        android:id="@+id/img_close_op_b"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:src="@drawable/close"
                         android:visibility="gone" />
+
 
                 </LinearLayout>
 
@@ -211,7 +175,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="10dp"
                     android:orientation="horizontal"
-                    android:visibility="visible">
+                    android:visibility="gone">
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -228,29 +192,6 @@
 
                 </LinearLayout>
 
-                <LinearLayout
-                    android:id="@+id/ll_op_b_exp_hide"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
-                    android:orientation="horizontal"
-                    android:visibility="gone">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Hide Explanation"
-                        android:textColor="@color/blue_font"
-                        android:textSize="18sp" />
-
-                    <ImageView
-
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:src="@drawable/drop_down_arrow" />
-
-
-                </LinearLayout>
 
                 <TextView
                     android:id="@+id/tv_correct_ans_b"
@@ -297,15 +238,8 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:src="@drawable/right_mark"
-                        android:visibility="visible" />
-
-                    <ImageView
-                        android:id="@+id/img_close_op_c"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:src="@drawable/close"
                         android:visibility="gone" />
+
 
                 </LinearLayout>
 
@@ -315,7 +249,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="10dp"
                     android:orientation="horizontal"
-                    android:visibility="visible">
+                    android:visibility="gone">
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -332,29 +266,6 @@
 
                 </LinearLayout>
 
-                <LinearLayout
-                    android:id="@+id/ll_op_c_exp_hide"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
-                    android:orientation="horizontal"
-                    android:visibility="gone">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Hide Explanation"
-                        android:textColor="@color/blue_font"
-                        android:textSize="18sp" />
-
-                    <ImageView
-
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:src="@drawable/drop_down_arrow" />
-
-
-                </LinearLayout>
 
                 <TextView
                     android:id="@+id/tv_correct_ans_c"
@@ -401,15 +312,8 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:src="@drawable/right_mark"
-                        android:visibility="visible" />
-
-                    <ImageView
-                        android:id="@+id/img_close_op_d"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:src="@drawable/close"
                         android:visibility="gone" />
+
 
                 </LinearLayout>
 
@@ -419,7 +323,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="10dp"
                     android:orientation="horizontal"
-                    android:visibility="visible">
+                    android:visibility="gone">
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -436,38 +340,15 @@
 
                 </LinearLayout>
 
-                <LinearLayout
-                    android:id="@+id/ll_op_d_exp_hide"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
-                    android:orientation="horizontal"
-                    android:visibility="gone">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Hide Explanation"
-                        android:textColor="@color/blue_font"
-                        android:textSize="18sp" />
-
-                    <ImageView
-
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:src="@drawable/drop_down_arrow" />
-
-
-                </LinearLayout>
 
                 <TextView
                     android:id="@+id/tv_correct_ans_d"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Correct Answer: A notification with today's Question of the Day \n \n A notification with today's Question of the Day A notification with today's Question of the Day A notification with today's Question of the Day A notification with today's Question of the Day A notification with today's Question of the Day A notification with today's Question of the Day  \n \n A notification with today's Question of the Day A notification with today's Question of the Day A notification with today's Question of the Day A notification with today's Question of the Day A notification with today's Question of the Day A notification with today's Question of the Day "
+                    android:text=""
                     android:textColor="@color/black"
                     android:textSize="18sp"
-                    android:visibility="visible" />
+                    android:visibility="gone" />
 
 
             </LinearLayout>
