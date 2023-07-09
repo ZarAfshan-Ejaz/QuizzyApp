@@ -27,6 +27,12 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="20dp"
                 android:text="Add Data" />
+            <TextView
+                android:id="@+id/btn_update_exiting_quiz"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:text="Update Data" />
 
             <TextView
                 android:layout_width="match_parent"

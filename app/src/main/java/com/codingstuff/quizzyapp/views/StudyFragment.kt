@@ -10,8 +10,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
+import android.widget.Button
 import android.widget.CalendarView
 import android.widget.LinearLayout
+import android.widget.SeekBar
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.navigation.NavController
@@ -22,6 +24,7 @@ import com.codingstuff.quizzyapp.CalendarAdapter
 import com.codingstuff.quizzyapp.Model.QuestionModel
 import com.codingstuff.quizzyapp.Model.QuizModel
 import com.codingstuff.quizzyapp.R
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -49,9 +52,13 @@ class StudyFragment : Fragment() {
 //        val calendarView: CalendarView = view.findViewById<CalendarView>(R.id.calendar_view)
         val calendarViewRV: RecyclerView = view.findViewById<RecyclerView>(R.id.calendar_view_rv)
         val add_quiz_to_db: TextView = view.findViewById<TextView>(R.id.tv_add_quiz)
+        val btn_update_exiting_quiz: TextView = view.findViewById<TextView>(R.id.btn_update_exiting_quiz)
 
         add_quiz_to_db.setOnClickListener(View.OnClickListener {
             add_quiz()
+        })
+        btn_update_exiting_quiz.setOnClickListener(View.OnClickListener {
+            removeAnyField()
         })
 
         setupCalendarView(calendarViewRV)
@@ -84,6 +91,7 @@ class StudyFragment : Fragment() {
     }
 
     private fun openDialog(dialogId: Int) {
+
         val dialog = Dialog(requireContext())
         dialog.setContentView(dialogId)
         dialog.window!!.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
@@ -91,6 +99,23 @@ class StudyFragment : Fragment() {
         layoutParams.copyFrom(dialog.window!!.attributes)
         layoutParams.width = WindowManager.LayoutParams.MATCH_PARENT
         dialog.window!!.attributes = layoutParams
+
+        if (dialogId == (R.layout.select_quiz_time_dialog)){
+            val startButton = dialog.findViewById<Button>(R.id.btn_start)
+            val seekBar = dialog.findViewById<SeekBar>(R.id.seekBar)
+
+            startButton.setOnClickListener {
+                val minutesSelected = seekBar.progress
+                val millisecondsSelected = minutesSelected * 60 * 1000L
+                val bundle = Bundle()
+                //bundle.putString("START_TIMER", "value")
+                bundle.putLong("millisecondsSelected", millisecondsSelected)
+
+                navController!!.navigate(R.id.action_studyFragment_to_quizFragment,bundle)
+
+                dialog.dismiss()
+            }
+        }
         dialog.show()
     }
 
@@ -145,8 +170,8 @@ class StudyFragment : Fragment() {
     fun add_quiz(   ) {
         val firestore = FirebaseFirestore.getInstance()
 
-        val collectionPath = "/Exams/CEReGwH8PMG8zXVQqP3B/ComputerScience/Ay8RWesFncvEBVmuIAx0/Questions"
         val quizModel = QuizModel(
+                questionId = "",
                 answer = "Your answer",
                 question = "Your question",
                 reason = "Your reason",
@@ -156,10 +181,20 @@ class StudyFragment : Fragment() {
                 option_d = "Option D"
         )
 
+        val collectionPath = "/Exams/CEReGwH8PMG8zXVQqP3B/ComputerScience/Ay8RWesFncvEBVmuIAx0/Questions"
+
         val collectionRef = firestore.collection(collectionPath)
         collectionRef.add(quizModel)
                 .addOnSuccessListener { documentReference ->
                     val quizId = documentReference.id
+                    quizModel.questionId = quizId
+                    // Update the document with the document ID field
+                    documentReference.set(quizModel) .addOnSuccessListener {
+                        Log.d(TAG, "Quiz document added with ID: $quizId")
+                    }
+                            .addOnFailureListener { e ->
+                                Log.e(TAG, "Error updating quiz document: $e")
+                            }
                     // Quiz document successfully added with auto-generated ID
                     Log.d(TAG, "Quiz document added with ID: $quizId")
 
@@ -192,4 +227,48 @@ class StudyFragment : Fragment() {
                 }
     }
 
+    fun updateExistingDocuments(){
+        val firestore = FirebaseFirestore.getInstance()
+        val collectionPath = "/Exams/CEReGwH8PMG8zXVQqP3B/ComputerScience/Ay8RWesFncvEBVmuIAx0/Questions"
+        val collectionRef = firestore.collection(collectionPath)
+
+        collectionRef.get().addOnSuccessListener { querySnapshot ->
+            for (document in querySnapshot.documents) {
+                val quizId = document.id
+                // Update the document with the document ID field
+                document.reference.update("questionId", quizId)
+                        .addOnSuccessListener {
+                            Log.d(TAG, "Document updated with ID: $quizId")
+                        }
+                        .addOnFailureListener { e ->
+                            Log.e(TAG, "Error updating document: $e")
+                        }
+            }
+        }.addOnFailureListener { exception ->
+            Log.e(TAG, "Error getting documents: $exception")
+        }
+
+
+    }
+
+    fun removeAnyField(){
+        val firestore = FirebaseFirestore.getInstance()
+        val collectionPath = "/Exams/CEReGwH8PMG8zXVQqP3B/ComputerScience/Ay8RWesFncvEBVmuIAx0/Questions"
+        val collectionRef = firestore.collection(collectionPath)
+
+        collectionRef.get().addOnSuccessListener { querySnapshot ->
+            for (document in querySnapshot.documents) {
+                // Remove the specific field from the document
+                document.reference.update("documentId", FieldValue.delete())
+                        .addOnSuccessListener {
+                            Log.d(TAG, "Field removed from document: ${document.id}")
+                        }
+                        .addOnFailureListener { e ->
+                            Log.e(TAG, "Error removing field from document: ${document.id}, $e")
+                        }
+            }
+        }.addOnFailureListener { exception ->
+            Log.e(TAG, "Error getting documents: $exception")
+        }
+    }
 }

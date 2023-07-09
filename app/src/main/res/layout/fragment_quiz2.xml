@@ -11,10 +11,24 @@
         android:layout_marginBottom="60dp"
         android:layout_height="match_parent">
 
+        <TextView
+            android:id="@+id/tv_timer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_marginTop="5dp"
+            android:layout_marginBottom="5dp"
+            android:gravity="center"
+            android:text="00:00:00"
+            android:textColor="@color/black"
+            android:textSize="18sp" />
+
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recyclerView"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="match_parent"
+            android:layout_below="@+id/tv_timer"
+            android:layout_marginTop="10dp" />
 
         <ImageButton
             android:id="@+id/leftArrow"
@@ -25,6 +39,7 @@
             android:src="@drawable/arrow_back" />
 
         <Button
+            android:id="@+id/btn_submit"
             android:layout_width="230dp"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"

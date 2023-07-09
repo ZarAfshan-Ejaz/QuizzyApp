@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_graph"
-    app:startDestination="@id/studyFragment">
+    app:startDestination="@id/splashFragment">
     <fragment
         android:id="@+id/splashFragment"
         android:name="com.codingstuff.quizzyapp.views.SplashFragment"
@@ -42,6 +42,9 @@
         <action
             android:id="@+id/action_signInFragment_to_listFragment"
             app:destination="@id/listFragment" />
+        <action
+            android:id="@+id/action_signInFragment_to_studyFragment"
+            app:destination="@id/studyFragment" />
     </fragment>
     <fragment
         android:id="@+id/listFragment"

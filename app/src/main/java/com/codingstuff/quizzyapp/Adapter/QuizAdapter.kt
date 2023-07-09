@@ -1,5 +1,8 @@
 package com.codingstuff.quizzyapp.Adapter
 
+import android.content.ContentValues
+import android.content.ContentValues.TAG
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -9,10 +12,13 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.codingstuff.quizzyapp.Model.QuizModel
 import com.codingstuff.quizzyapp.R
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 
 class QuizAdapter(private val quizList: List<QuizModel>) : RecyclerView.Adapter<QuizAdapter.QuizViewHolder>() {
+    val quizListTemp = mutableListOf<QuizModel>()
     private var isExplanationVisible = false
-
+    lateinit var  quiz : QuizModel
     inner class QuizViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         // Initialize views in the item layout
         val tv_question: TextView = itemView.findViewById(R.id.tv_question)
@@ -54,8 +60,10 @@ class QuizAdapter(private val quizList: List<QuizModel>) : RecyclerView.Adapter<
     }
 
     override fun onBindViewHolder(holder: QuizViewHolder, position: Int) {
+        var buttonClicked = false
+
         // Bind data to the views in the ViewHolder
-        val quiz = quizList[position]
+         quiz = quizList[position]
         holder.tv_question.text = quiz.question
         //holder.answerTextView.text = quiz.answer
 
@@ -64,12 +72,12 @@ class QuizAdapter(private val quizList: List<QuizModel>) : RecyclerView.Adapter<
         holder.tv_op_c.text = quiz.option_c
         holder.tv_op_d.text = quiz.option_d
 
-
         val corr_opt = quiz.answer
         val reason = quiz.reason
         val ans = "$corr_opt\n+$reason"
 
         holder.ll_main_op_a.setOnClickListener(View.OnClickListener {
+/*
             if (corr_opt=="option_a"){
                 holder.img_res_op_a.setImageResource(R.drawable.right_mark)
                 holder.llOpDExpShow_a.visibility = View.VISIBLE
@@ -80,10 +88,12 @@ class QuizAdapter(private val quizList: List<QuizModel>) : RecyclerView.Adapter<
                 holder.img_res_op_a.visibility = View.VISIBLE
                 holder.img_res_op_a.setImageResource(R.drawable.close)
             }
-            freezTheResult(holder)
-
+*/
+           // freezTheResult(holder)
+            answerSelected(holder,holder.llOpDExpShow_a,holder.img_res_op_a, holder.tv_op_a_ans,corr_opt,holder.tv_op_a.text.toString(),reason,holder.img_res_op_a, false,true)
         })
         holder.ll_main_op_b.setOnClickListener(View.OnClickListener {
+/*
             if (corr_opt =="option_b"){
                 holder.llOpDExpShow_b.visibility = View.VISIBLE
                 holder.img_res_op_b.setImageResource(R.drawable.right_mark)
@@ -96,9 +106,11 @@ class QuizAdapter(private val quizList: List<QuizModel>) : RecyclerView.Adapter<
                 holder.img_res_op_b.setImageResource(R.drawable.close)
             }
             freezTheResult(holder)
-
+*/
+            answerSelected(holder,holder.llOpDExpShow_b,holder.img_res_op_b, holder.tv_op_b_ans,corr_opt,holder.tv_op_b.text.toString(),reason,holder.img_res_op_b, false,true)
         })
         holder.ll_main_op_c.setOnClickListener(View.OnClickListener {
+/*
             if (corr_opt =="option_c"){
                 holder.llOpDExpShow_c.visibility = View.VISIBLE
                 holder.img_res_op_c.setImageResource(R.drawable.right_mark)
@@ -111,9 +123,11 @@ class QuizAdapter(private val quizList: List<QuizModel>) : RecyclerView.Adapter<
                 holder.img_res_op_c.setImageResource(R.drawable.close)
             }
             freezTheResult(holder)
-
+*/
+            answerSelected(holder,holder.llOpDExpShow_c,holder.img_res_op_c, holder.tv_op_c_ans,corr_opt,holder.tv_op_c.text.toString(),reason,holder.img_res_op_c, false,true)
         })
         holder.ll_main_op_d.setOnClickListener(View.OnClickListener {
+/*
             if (corr_opt =="option_d"){
                 holder.img_res_op_d.visibility = View.VISIBLE
                 holder.llOpDExpShow_d.visibility = View.VISIBLE
@@ -125,6 +139,8 @@ class QuizAdapter(private val quizList: List<QuizModel>) : RecyclerView.Adapter<
                 holder.img_res_op_d.setImageResource(R.drawable.close)
             }
             freezTheResult(holder)
+*/
+            answerSelected(holder,holder.llOpDExpShow_d,holder.img_res_op_d, holder.tv_op_d_ans,corr_opt,holder.tv_op_d.text.toString(),reason,holder.img_res_op_d, false,true)
         })
 
 
@@ -187,8 +203,6 @@ class QuizAdapter(private val quizList: List<QuizModel>) : RecyclerView.Adapter<
             holder.img_res_op_a.visibility = View.VISIBLE
             holder.img_res_op_a.setImageResource(R.drawable.close)
         }
-        freezTheResult(holder)
-        freezTheResult(holder)
         if (corr_opt =="option_b"){
             holder.llOpDExpShow_b.visibility = View.VISIBLE
             holder.img_res_op_b.setImageResource(R.drawable.right_mark)
@@ -200,7 +214,6 @@ class QuizAdapter(private val quizList: List<QuizModel>) : RecyclerView.Adapter<
             holder.img_res_op_b.visibility = View.VISIBLE
             holder.img_res_op_b.setImageResource(R.drawable.close)
         }
-        freezTheResult(holder)
         if (corr_opt =="option_c"){
             holder.llOpDExpShow_c.visibility = View.VISIBLE
             holder.img_res_op_c.setImageResource(R.drawable.right_mark)
@@ -212,7 +225,6 @@ class QuizAdapter(private val quizList: List<QuizModel>) : RecyclerView.Adapter<
             holder.img_res_op_c.visibility = View.VISIBLE
             holder.img_res_op_c.setImageResource(R.drawable.close)
         }
-        freezTheResult(holder)
         if (corr_opt =="option_d"){
             holder.img_res_op_d.visibility = View.VISIBLE
             holder.llOpDExpShow_d.visibility = View.VISIBLE
@@ -223,7 +235,6 @@ class QuizAdapter(private val quizList: List<QuizModel>) : RecyclerView.Adapter<
             holder.img_res_op_d.visibility = View.VISIBLE
             holder.img_res_op_d.setImageResource(R.drawable.close)
         }
-        freezTheResult(holder)
 
     }
     fun showWrongOptn(holder: QuizViewHolder, corr_opt:String?, ans:String){
@@ -265,6 +276,7 @@ class QuizAdapter(private val quizList: List<QuizModel>) : RecyclerView.Adapter<
         freezTheResult(holder)
 
     }
+/*
     fun showRightOptn(holder: QuizViewHolder, corr_opt:String?, ans:String){
 
         when (corr_opt){
@@ -308,6 +320,87 @@ class QuizAdapter(private val quizList: List<QuizModel>) : RecyclerView.Adapter<
 
         freezTheResult(holder)
 
+    }
+*/
+  fun answerSelected(
+          holder: QuizViewHolder,
+          llOpDExpShow_c : LinearLayout,
+          img_res : ImageView,
+          tv_answer:TextView,
+          answer:String?,
+          selected_op : String?,
+          reason : String?,
+          img_wrng_right:ImageView,
+          flagged: Boolean,
+          attempted:Boolean
+
+  ){
+    val correct:Boolean
+
+    if (selected_op == answer){
+          llOpDExpShow_c.visibility = View.VISIBLE
+          img_res.setImageResource(R.drawable.right_mark)
+          tv_answer.text = reason
+          tv_answer.visibility = View.VISIBLE
+          correct = true
+
+      }else{
+          img_wrng_right.visibility = View.VISIBLE
+          img_wrng_right.setImageResource(R.drawable.close)
+        correct = false
+
+    }
+      freezTheResult(holder)
+      submitQuiz(quiz,selected_op, flagged,correct,attempted)
+
+  }
+    fun submitQuiz(
+            quizModel: QuizModel,
+            selected_op: String?,
+            flagged: Boolean?,
+            correct: Boolean?,
+            attempted: Boolean?
+    ) {
+        val firebaseAuth: FirebaseAuth = FirebaseAuth.getInstance()
+        val user_id: String? = firebaseAuth.currentUser?.uid
+
+        val firestore = FirebaseFirestore.getInstance()
+
+        val questionId = quizModel.questionId
+        val collectionPath = "/users/$user_id/history/$questionId"
+
+        val quizModelData = QuizModel(
+                questionId = questionId,
+                answer = quizModel.answer,
+                question = quizModel.question,
+                reason = quizModel.reason,
+                option_a = quizModel.option_a,
+                option_b = quizModel.option_b,
+                option_c = quizModel.option_c,
+                option_d = quizModel.option_d,
+                select_opt = selected_op,
+                flagged = flagged,
+                correct = correct,
+                attempted = attempted
+        )
+
+        quizListTemp.add(quizModelData)
+///////////////////////////////
+
+        quizListTemp.addAll(quizList.filterNot { quiz -> quizListTemp.contains(quiz) }
+                .map { quiz -> quiz.copy(attempted = false) })
+
+        Log.e(TAG, "Error adding quiz document: $quizListTemp")
+
+///////////////////////////////
+        val documentRef = firestore.document(collectionPath)
+        documentRef.set(quizModelData)
+                .addOnSuccessListener {
+                    Log.d(TAG, "Quiz document added with ID: $questionId")
+                }
+                .addOnFailureListener { e ->
+                    Log.e(TAG, "Error adding quiz document: $e")
+                }
     }
 
 }

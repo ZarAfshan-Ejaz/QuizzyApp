@@ -47,7 +47,8 @@ class SignInFragment : Fragment() {
                 viewModel!!.firebaseUserMutableLiveData.observe(viewLifecycleOwner, object : Observer<FirebaseUser?> {
                     override fun onChanged(firebaseUser: FirebaseUser?) {
                         if (firebaseUser != null) {
-                            navController!!.navigate(R.id.action_signInFragment_to_listFragment)
+                            //navController!!.navigate(R.id.action_signInFragment_to_listFragment)
+                            navController!!.navigate(R.id.action_signInFragment_to_studyFragment)
                         }
                     }
 
