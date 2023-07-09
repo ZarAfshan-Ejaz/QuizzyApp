@@ -16,12 +16,12 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 
 class QuizAdapter(private val quizList: List<QuizModel>) : RecyclerView.Adapter<QuizAdapter.QuizViewHolder>() {
-    val quizListTemp = mutableListOf<QuizModel>()
     private var isExplanationVisible = false
     lateinit var  quiz : QuizModel
     inner class QuizViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         // Initialize views in the item layout
         val tv_question: TextView = itemView.findViewById(R.id.tv_question)
+        val tv_question_no: TextView = itemView.findViewById(R.id.tv_question_no)
 
         val tv_op_a: TextView = itemView.findViewById(R.id.tv_op_a)
         val img_res_op_a: ImageView =itemView.findViewById(R.id.img_res_op_a)
@@ -72,74 +72,23 @@ class QuizAdapter(private val quizList: List<QuizModel>) : RecyclerView.Adapter<
         holder.tv_op_c.text = quiz.option_c
         holder.tv_op_d.text = quiz.option_d
 
+        val index = position+1
+        holder.tv_question_no.text = "Question $index / ${quizList.size}"
+
         val corr_opt = quiz.answer
         val reason = quiz.reason
         val ans = "$corr_opt\n+$reason"
 
         holder.ll_main_op_a.setOnClickListener(View.OnClickListener {
-/*
-            if (corr_opt=="option_a"){
-                holder.img_res_op_a.setImageResource(R.drawable.right_mark)
-                holder.llOpDExpShow_a.visibility = View.VISIBLE
-                holder.tv_op_a_ans.text = "$corr_opt\n$reason"
-                holder.tv_op_a_ans.visibility = View.VISIBLE
-
-            }else{
-                holder.img_res_op_a.visibility = View.VISIBLE
-                holder.img_res_op_a.setImageResource(R.drawable.close)
-            }
-*/
-           // freezTheResult(holder)
             answerSelected(holder,holder.llOpDExpShow_a,holder.img_res_op_a, holder.tv_op_a_ans,corr_opt,holder.tv_op_a.text.toString(),reason,holder.img_res_op_a, false,true)
         })
         holder.ll_main_op_b.setOnClickListener(View.OnClickListener {
-/*
-            if (corr_opt =="option_b"){
-                holder.llOpDExpShow_b.visibility = View.VISIBLE
-                holder.img_res_op_b.setImageResource(R.drawable.right_mark)
-                holder.tv_op_b_ans.text = "$corr_opt\n$reason"
-                holder.tv_op_b_ans.visibility = View.VISIBLE
-
-
-            }else{
-                holder.img_res_op_b.visibility = View.VISIBLE
-                holder.img_res_op_b.setImageResource(R.drawable.close)
-            }
-            freezTheResult(holder)
-*/
             answerSelected(holder,holder.llOpDExpShow_b,holder.img_res_op_b, holder.tv_op_b_ans,corr_opt,holder.tv_op_b.text.toString(),reason,holder.img_res_op_b, false,true)
         })
         holder.ll_main_op_c.setOnClickListener(View.OnClickListener {
-/*
-            if (corr_opt =="option_c"){
-                holder.llOpDExpShow_c.visibility = View.VISIBLE
-                holder.img_res_op_c.setImageResource(R.drawable.right_mark)
-                holder.tv_op_c_ans.text = "$corr_opt\n$reason"
-                holder.tv_op_c_ans.visibility = View.VISIBLE
-
-
-            }else{
-                holder.img_res_op_c.visibility = View.VISIBLE
-                holder.img_res_op_c.setImageResource(R.drawable.close)
-            }
-            freezTheResult(holder)
-*/
             answerSelected(holder,holder.llOpDExpShow_c,holder.img_res_op_c, holder.tv_op_c_ans,corr_opt,holder.tv_op_c.text.toString(),reason,holder.img_res_op_c, false,true)
         })
         holder.ll_main_op_d.setOnClickListener(View.OnClickListener {
-/*
-            if (corr_opt =="option_d"){
-                holder.img_res_op_d.visibility = View.VISIBLE
-                holder.llOpDExpShow_d.visibility = View.VISIBLE
-                holder.img_res_op_d.setImageResource(R.drawable.right_mark)
-                holder.tv_op_d_ans.text = "$corr_opt\n$reason"
-
-            }else{
-                holder.img_res_op_d.visibility = View.VISIBLE
-                holder.img_res_op_d.setImageResource(R.drawable.close)
-            }
-            freezTheResult(holder)
-*/
             answerSelected(holder,holder.llOpDExpShow_d,holder.img_res_op_d, holder.tv_op_d_ans,corr_opt,holder.tv_op_d.text.toString(),reason,holder.img_res_op_d, false,true)
         })
 
@@ -384,15 +333,6 @@ class QuizAdapter(private val quizList: List<QuizModel>) : RecyclerView.Adapter<
                 attempted = attempted
         )
 
-        quizListTemp.add(quizModelData)
-///////////////////////////////
-
-        quizListTemp.addAll(quizList.filterNot { quiz -> quizListTemp.contains(quiz) }
-                .map { quiz -> quiz.copy(attempted = false) })
-
-        Log.e(TAG, "Error adding quiz document: $quizListTemp")
-
-///////////////////////////////
         val documentRef = firestore.document(collectionPath)
         documentRef.set(quizModelData)
                 .addOnSuccessListener {

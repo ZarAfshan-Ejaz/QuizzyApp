@@ -29,6 +29,7 @@
                 android:paddingLeft="30dp"
                 android:paddingRight="30dp"
                 android:text="Submit Quiz"
+                android:visibility="gone"
                 android:textColor="@color/white" />
 
             <LinearLayout
@@ -36,7 +37,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:orientation="vertical"
-                android:visibility="gone"
+                android:visibility="visible"
                 android:padding="10dp">
 
                 <ImageView
@@ -53,15 +54,6 @@
                     android:layout_marginBottom="10dp"
                     android:src="@drawable/quick_10_quiz" />
 
-                <TextView
-                    android:id="@+id/tv_testing"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="5dp"
-                    android:gravity="center"
-                    android:text="Testing"
-                    android:textColor="@color/black"
-                    android:textSize="18sp" />
 
                 <TextView
                     android:id="@+id/tv_question_no"

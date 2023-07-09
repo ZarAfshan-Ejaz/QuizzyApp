@@ -63,7 +63,11 @@ class StudyFragment : Fragment() {
 
         setupCalendarView(calendarViewRV)
         ll_btn_qotd.setOnClickListener {
-            navController!!.navigate(R.id.action_studyFragment_to_quizFragment)
+            val bundle = Bundle()
+            //bundle.putString("START_TIMER", "value")
+            bundle.putString("QUIZ_CAT", "QotD")
+            navController!!.navigate(R.id.action_studyFragment_to_quizFragment,bundle)
+
         }
         ll_btn_build_quiz.setOnClickListener { //openBuildYourOwnQuizDialog();
             openDialog(R.layout.build_your_own_questions_dialog)
@@ -78,9 +82,10 @@ class StudyFragment : Fragment() {
             openDialog(R.layout.weakest_subject_quiz_dialog)
         }
         ll_btn_quick_10_quiz.setOnClickListener { //openMissedQuizDialog();
-            navController!!.navigate(R.id.action_studyFragment_to_quizFragment)
+            val bundle = Bundle()
+            bundle.putString("QUIZ_CAT", "QUICK_10_QUIZ")
 
-            //openDialog(R.layout.quit_quiz_dialog)
+            navController!!.navigate(R.id.action_studyFragment_to_quizFragment,bundle)
         }
         return view
     }
@@ -108,7 +113,7 @@ class StudyFragment : Fragment() {
                 val minutesSelected = seekBar.progress
                 val millisecondsSelected = minutesSelected * 60 * 1000L
                 val bundle = Bundle()
-                //bundle.putString("START_TIMER", "value")
+                bundle.putString("QUIZ_CAT", "timed_quiz")
                 bundle.putLong("millisecondsSelected", millisecondsSelected)
 
                 navController!!.navigate(R.id.action_studyFragment_to_quizFragment,bundle)
@@ -116,7 +121,22 @@ class StudyFragment : Fragment() {
                 dialog.dismiss()
             }
         }
-        dialog.show()
+        if (dialogId == (R.layout.missed_questions_quiz_dialog)){
+            val startButton = dialog.findViewById<Button>(R.id.btn_start_mq)
+            val seekBar = dialog.findViewById<SeekBar>(R.id.seekBar_mq)
+
+            startButton.setOnClickListener {
+                val no_of_quiz = seekBar.progress
+                val bundle = Bundle()
+                bundle.putString("QUIZ_CAT", "missed_quiz")
+                bundle.putInt("NO-Of_Quiz", no_of_quiz)
+
+                navController!!.navigate(R.id.action_studyFragment_to_quizFragment,bundle)
+
+                dialog.dismiss()
+            }
+        }
+            dialog.show()
     }
 
     companion object {

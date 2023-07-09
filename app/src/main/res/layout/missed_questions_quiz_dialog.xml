@@ -142,11 +142,11 @@
                         android:textStyle="bold" />
 
                     <SeekBar
-                        android:id="@+id/seekBar"
+                        android:id="@+id/seekBar_mq"
                         android:layout_width="0dp"
                         android:layout_height="match_parent"
                         android:layout_weight="7"
-                        android:max="30"
+                        android:max="20"
                         android:padding="20dp"
                         android:progress="0" />
 
@@ -157,7 +157,7 @@
                         android:layout_marginEnd="20dp"
                         android:layout_weight="1"
                         android:gravity="center"
-                        android:text="10"
+                        android:text="20"
                         android:textColor="@color/black"
                         android:textSize="20sp"
                         android:textStyle="bold" />
@@ -165,6 +165,7 @@
                 </LinearLayout>
 
                 <Button
+                    android:id="@+id/btn_start_mq"
                     android:layout_width="230dp"
                     android:layout_height="wrap_content"
                     android:layout_alignParentBottom="true"
