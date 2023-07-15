@@ -11,7 +11,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
 import android.widget.Button
-import android.widget.CalendarView
+import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.SeekBar
 import android.widget.TextView
@@ -21,7 +21,6 @@ import androidx.navigation.Navigation
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.codingstuff.quizzyapp.CalendarAdapter
-import com.codingstuff.quizzyapp.Model.QuestionModel
 import com.codingstuff.quizzyapp.Model.QuizModel
 import com.codingstuff.quizzyapp.R
 import com.google.firebase.firestore.FieldValue
@@ -32,6 +31,11 @@ import java.util.Date
 import java.util.Locale
 
 class StudyFragment : Fragment() {
+    lateinit var tv_studied_updates: TextView
+    lateinit var img_studied: ImageView
+    lateinit var btn_tv_hide: ImageView
+    lateinit var btn_tv_show: ImageView
+    lateinit var rv_calendarView: RecyclerView
     private var navController: NavController? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -50,18 +54,39 @@ class StudyFragment : Fragment() {
         val ll_btn_weakest_subject_quiz = view.findViewById<LinearLayout>(R.id.ll_btn_weakest_subject_quiz)
         val ll_btn_quick_10_quiz = view.findViewById<LinearLayout>(R.id.ll_btn_quick_10_quiz)
 //        val calendarView: CalendarView = view.findViewById<CalendarView>(R.id.calendar_view)
-        val calendarViewRV: RecyclerView = view.findViewById<RecyclerView>(R.id.calendar_view_rv)
+         rv_calendarView = view.findViewById<RecyclerView>(R.id.calendar_view_rv)
+         tv_studied_updates = view.findViewById<TextView>(R.id.tv_studied_updates)
+        btn_tv_hide = view.findViewById<ImageView>(R.id.btn_tv_hide)
+        btn_tv_show = view.findViewById<ImageView>(R.id.btn_tv_show)
         val add_quiz_to_db: TextView = view.findViewById<TextView>(R.id.tv_add_quiz)
         val btn_update_exiting_quiz: TextView = view.findViewById<TextView>(R.id.btn_update_exiting_quiz)
+
 
         add_quiz_to_db.setOnClickListener(View.OnClickListener {
             add_quiz()
         })
         btn_update_exiting_quiz.setOnClickListener(View.OnClickListener {
-            removeAnyField()
+            //removeAnyField()
+           // update_multiple_fields()
+            //add_quiz()
+            moveToNewPath()
         })
 
-        setupCalendarView(calendarViewRV)
+        btn_tv_hide.setOnClickListener(View.OnClickListener {
+            tv_studied_updates.visibility = View.GONE
+            rv_calendarView.visibility = View.VISIBLE
+            btn_tv_hide.visibility = View.GONE
+            btn_tv_show.visibility = View.VISIBLE
+        })
+        btn_tv_show.setOnClickListener(View.OnClickListener {
+            tv_studied_updates.visibility = View.VISIBLE
+            rv_calendarView.visibility = View.GONE
+            rv_calendarView.visibility = View.GONE
+            btn_tv_show.visibility = View.GONE
+            btn_tv_hide.visibility = View.VISIBLE
+
+        })
+        setupCalendarView(rv_calendarView)
         ll_btn_qotd.setOnClickListener {
             val bundle = Bundle()
             //bundle.putString("START_TIMER", "value")
@@ -70,7 +95,7 @@ class StudyFragment : Fragment() {
 
         }
         ll_btn_build_quiz.setOnClickListener { //openBuildYourOwnQuizDialog();
-            openDialog(R.layout.build_your_own_questions_dialog)
+            navController!!.navigate(R.id.action_studyFragment_to_buildYourOwnQuestionDialog)
         }
         ll_btn_missed_quiz.setOnClickListener { //openMissedQuizDialog();
             openDialog(R.layout.missed_questions_quiz_dialog)
@@ -80,6 +105,7 @@ class StudyFragment : Fragment() {
         }
         ll_btn_weakest_subject_quiz.setOnClickListener { //openMissedQuizDialog();
             openDialog(R.layout.weakest_subject_quiz_dialog)
+
         }
         ll_btn_quick_10_quiz.setOnClickListener { //openMissedQuizDialog();
             val bundle = Bundle()
@@ -89,6 +115,7 @@ class StudyFragment : Fragment() {
         }
         return view
     }
+
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -106,9 +133,23 @@ class StudyFragment : Fragment() {
         dialog.window!!.attributes = layoutParams
 
         if (dialogId == (R.layout.select_quiz_time_dialog)){
+            val img_close = dialog.findViewById<ImageView>(R.id.img_close_t)
             val startButton = dialog.findViewById<Button>(R.id.btn_start)
-            val seekBar = dialog.findViewById<SeekBar>(R.id.seekBar)
+            val seekBar = dialog.findViewById<SeekBar>(R.id.seekBar_t)
+            val tv_num_of_ques_t = dialog.findViewById<TextView>(R.id.tv_num_of_ques_t)
 
+            seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+                override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+                    // Update tv_num_of_ques with the new progress value
+                    tv_num_of_ques_t.text = progress.toString()
+                }
+
+                override fun onStartTrackingTouch(seekBar: SeekBar?) {
+                }
+
+                override fun onStopTrackingTouch(seekBar: SeekBar?) {
+                }
+            })
             startButton.setOnClickListener {
                 val minutesSelected = seekBar.progress
                 val millisecondsSelected = minutesSelected * 60 * 1000L
@@ -120,16 +161,69 @@ class StudyFragment : Fragment() {
 
                 dialog.dismiss()
             }
+            img_close.setOnClickListener(View.OnClickListener { dialog.dismiss()     })
+        }
+        if (dialogId == (R.layout.weakest_subject_quiz_dialog)){
+            val startButton = dialog.findViewById<Button>(R.id.btn_dismiss)
+            val seekBar = dialog.findViewById<SeekBar>(R.id.seekBar_w)
+            val tv_num_of_ques = dialog.findViewById<TextView>(R.id.tv_num_of_ques)
+            val img_close = dialog.findViewById<ImageView>(R.id.img_close_w)
+            img_close.setOnClickListener(View.OnClickListener { dialog.dismiss()     })
+
+            // Set the initial value of tv_num_of_ques to the current seekBar progress
+            tv_num_of_ques.text = seekBar.progress.toString()
+
+            // Set a listener to track seekBar progress changes
+            seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+                override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+                    // Update tv_num_of_ques with the new progress value
+                    tv_num_of_ques.text = progress.toString()
+                }
+
+                override fun onStartTrackingTouch(seekBar: SeekBar?) {
+                }
+
+                override fun onStopTrackingTouch(seekBar: SeekBar?) {
+                }
+            })
+
+            startButton.setOnClickListener {
+                val minutesSelected = seekBar.progress
+
+                val bundle = Bundle()
+                bundle.putString("QUIZ_CAT", "weakest_sub")
+                bundle.putInt("NO_Of_Quiz", minutesSelected)
+
+                navController!!.navigate(R.id.action_studyFragment_to_quizFragment, bundle)
+
+                dialog.dismiss()
+            }
         }
         if (dialogId == (R.layout.missed_questions_quiz_dialog)){
             val startButton = dialog.findViewById<Button>(R.id.btn_start_mq)
             val seekBar = dialog.findViewById<SeekBar>(R.id.seekBar_mq)
+            val tv_num_of_ques = dialog.findViewById<TextView>(R.id.tv_num_of_ques_m)
+            val img_close = dialog.findViewById<ImageView>(R.id.img_close_m)
+            img_close.setOnClickListener(View.OnClickListener { dialog.dismiss()     })
+
+            seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+                override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+                    // Update tv_num_of_ques with the new progress value
+                    tv_num_of_ques.text = progress.toString()
+                }
+
+                override fun onStartTrackingTouch(seekBar: SeekBar?) {
+                }
+
+                override fun onStopTrackingTouch(seekBar: SeekBar?) {
+                }
+            })
 
             startButton.setOnClickListener {
                 val no_of_quiz = seekBar.progress
                 val bundle = Bundle()
                 bundle.putString("QUIZ_CAT", "missed_quiz")
-                bundle.putInt("NO-Of_Quiz", no_of_quiz)
+                bundle.putInt("NO_Of_Quiz", no_of_quiz)
 
                 navController!!.navigate(R.id.action_studyFragment_to_quizFragment,bundle)
 
@@ -192,16 +286,19 @@ class StudyFragment : Fragment() {
 
         val quizModel = QuizModel(
                 questionId = "",
-                answer = "Your answer",
+                answer = "Option B",
                 question = "Your question",
-                reason = "Your reason",
+                reason = "Your reason, Option B is the right answer",
                 option_a = "Option A",
                 option_b = "Option B",
                 option_c = "Option C",
-                option_d = "Option D"
+                option_d = "Option D",
+                domain = "3",
+                subject = "Computer Science"
+
         )
 
-        val collectionPath = "/Exams/CEReGwH8PMG8zXVQqP3B/ComputerScience/Ay8RWesFncvEBVmuIAx0/Questions"
+        val collectionPath = "/Exams/ComputerScience/Questions"
 
         val collectionRef = firestore.collection(collectionPath)
         collectionRef.add(quizModel)
@@ -221,7 +318,7 @@ class StudyFragment : Fragment() {
                     ////////////////////////////////////////////////////
 
                     /*   // Get a reference to the source document
-        val sourceDocRef = FirebaseFirestore.getInstance().document("/Exams/CEReGwH8PMG8zXVQqP3B/ComputerScience/Ay8RWesFncvEBVmuIAx0/Questions")
+        val sourceDocRef = FirebaseFirestore.getInstance().document("/Exams/ComputerScience/Questions")
 
 // Read the data from the source document
         sourceDocRef.get().addOnSuccessListener { snapshot ->
@@ -247,16 +344,19 @@ class StudyFragment : Fragment() {
                 }
     }
 
+
+    //add or update single new field
     fun updateExistingDocuments(){
         val firestore = FirebaseFirestore.getInstance()
-        val collectionPath = "/Exams/CEReGwH8PMG8zXVQqP3B/ComputerScience/Ay8RWesFncvEBVmuIAx0/Questions"
+        val collectionPath = "/Exams/ComputerScience/Questions"
         val collectionRef = firestore.collection(collectionPath)
 
         collectionRef.get().addOnSuccessListener { querySnapshot ->
             for (document in querySnapshot.documents) {
                 val quizId = document.id
                 // Update the document with the document ID field
-                document.reference.update("questionId", quizId)
+               // document.reference.update("questionId", quizId)
+                document.reference.update("quiz_check", "new")
                         .addOnSuccessListener {
                             Log.d(TAG, "Document updated with ID: $quizId")
                         }
@@ -271,9 +371,47 @@ class StudyFragment : Fragment() {
 
     }
 
+    // add or update more thn one fields
+    fun update_multiple_fields() {
+        val firestore = FirebaseFirestore.getInstance()
+      //  val collectionPath = "/Exams/ComputerScience/Questions"
+        val collectionPath = "/users/G897SE6IwSfSgpqiISIGNCBmSrI3/history"
+        val collectionRef = firestore.collection(collectionPath)
+
+        collectionRef.get()
+                .addOnSuccessListener { querySnapshot ->
+                    val batch = firestore.batch()
+
+                    for (document in querySnapshot.documents) {
+                        val quizId = document.id
+
+                        val data = mapOf<String, Any>(
+                                "subject" to "Computer Science",
+                                "domain" to "1",
+                                "date" to "01-07-2023, 02:30:00" // "dd-mm-yyyy, hh:mm:ss"
+                                // Add more fields as needed
+                        )
+
+                        val documentRef = collectionRef.document(quizId)
+                        batch.update(documentRef, data)
+                    }
+
+                    batch.commit()
+                            .addOnSuccessListener {
+                                Log.d(TAG, "Documents updated successfully")
+                            }
+                            .addOnFailureListener { e ->
+                                Log.e(TAG, "Error updating documents: $e")
+                            }
+                }
+                .addOnFailureListener { exception ->
+                    Log.e(TAG, "Error getting documents: $exception")
+                }
+    }
+
     fun removeAnyField(){
         val firestore = FirebaseFirestore.getInstance()
-        val collectionPath = "/Exams/CEReGwH8PMG8zXVQqP3B/ComputerScience/Ay8RWesFncvEBVmuIAx0/Questions"
+        val collectionPath = "/Exams/ComputerScience/Questions"
         val collectionRef = firestore.collection(collectionPath)
 
         collectionRef.get().addOnSuccessListener { querySnapshot ->
@@ -291,4 +429,38 @@ class StudyFragment : Fragment() {
             Log.e(TAG, "Error getting documents: $exception")
         }
     }
+
+    private fun moveToNewPath(){
+        val firestore = FirebaseFirestore.getInstance()
+
+        val collectionRef_A = firestore.collection("/Exams/ComputerScience/Questions")
+        val collectionRef_B = firestore.collection("/Exams/ComputerScience/Questions")
+
+        collectionRef_A.get().addOnSuccessListener { querySnapshot ->
+            for (document in querySnapshot.documents) {
+                val documentData = document.toObject(QuizModel::class.java)
+                val documentId = document.id
+
+                // Update the domain_name field
+                documentData?.domain_name = "This is Domain 1 of Computer Science"
+
+                // Create a new document with the updated data in path_B
+                collectionRef_B.document(documentId).set(documentData!!)
+                        .addOnSuccessListener {
+                            // Document successfully duplicated
+                            Log.d(TAG, "Document duplicated: $documentId")
+                        }
+                        .addOnFailureListener { exception ->
+                            // Handle the error
+                            Log.e(TAG, "Error duplicating document: $documentId", exception)
+                        }
+            }
+        }
+                .addOnFailureListener { exception ->
+                    // Handle the error
+                    Log.e(TAG, "Error fetching documents from path_A: $exception")
+                }
+
+    }
+
 }

@@ -5,7 +5,8 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_gravity="center"
-    android:background="@color/light_gray">
+   android:background="@color/light_gray"
+    tools:context=".ui.dialogs.BuildYourOwnQuestionDialog">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -32,6 +33,7 @@
                 android:orientation="vertical">
 
                 <ImageView
+                    android:id="@+id/img_close_b"
                     android:layout_width="40dp"
                     android:layout_height="40dp"
                     android:layout_marginBottom="10dp"
@@ -62,9 +64,11 @@
                     app:cardBackgroundColor="@android:color/white"
                     app:cardCornerRadius="4dp"
                     app:cardElevation="4dp"
+                    android:orientation="vertical"
                     app:cardUseCompatPadding="true">
 
                     <LinearLayout
+                        android:id="@+id/ll_all_sub"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:layout_margin="10dp"
@@ -86,13 +90,15 @@
                             android:textStyle="bold" />
 
                         <ImageView
-                            android:layout_width="25dp"
+                            android:id="@+id/img_show_all_sub"
+                            android:layout_width="60dp"
                             android:layout_height="25dp"
                             android:visibility="visible"
                             android:layout_marginStart="5dp"
                             android:src="@drawable/drop_down_arrow" />
                         <ImageView
-                            android:layout_width="25dp"
+                            android:id="@+id/img_hide_all_sub"
+                            android:layout_width="60dp"
                             android:layout_height="25dp"
                             android:layout_marginStart="5dp"
                             android:visibility="gone"
@@ -114,6 +120,15 @@
                             android:textColor="@android:color/black" />
 
                     </LinearLayout>
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/rv_all_sub"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        tools:itemCount="6"
+                        tools:listitem="@layout/byoq_subject_item"
+                        >
+
+                    </androidx.recyclerview.widget.RecyclerView>
                 </LinearLayout>
 
                 <TextView
@@ -161,11 +176,10 @@
                                 android:text="After each question" />
 
                             <RadioButton
-                                android:id="@+id/r1"
+                                android:id="@+id/rb_after_ques"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_alignParentRight="true"
-                                android:layout_centerVertical="true"
                                 android:gravity="right" />
 
                         </RelativeLayout>
@@ -191,7 +205,7 @@
                                 android:text="After submitting quiz'" />
 
                             <RadioButton
-                                android:id="@+id/r2"
+                                android:id="@+id/rb_after_submit"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_alignParentRight="true"
@@ -248,6 +262,7 @@
                                 android:text="Automatic:Tab Answer Choice" />
 
                             <RadioButton
+                                android:id="@+id/rb_tab_ans"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_alignParentRight="true"
@@ -276,6 +291,7 @@
                                 android:text="Manual: Tab 'Check Answer'" />
 
                             <RadioButton
+                                android:id="@+id/rb_tab_check_ans"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_alignParentRight="true"
@@ -310,6 +326,7 @@
                         android:textColor="@android:color/black" />
 
                     <TextView
+                        android:id="@+id/tv_new_ques"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="2"
@@ -341,6 +358,7 @@
                         android:textColor="@android:color/black" />
 
                     <TextView
+                        android:id="@+id/tv_answered_ques"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="2"
@@ -372,6 +390,7 @@
                         android:textColor="@android:color/black" />
 
                     <TextView
+                        android:id="@+id/tv_flagged_ques"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="2"
@@ -403,6 +422,7 @@
                         android:textColor="@android:color/black" />
 
                     <TextView
+                        android:id="@+id/tv_missed_ques"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="2"
@@ -432,11 +452,11 @@
                     android:textSize="18sp" />
 
                 <TextView
-                    android:id="@+id/tv_num_of_ques"
+                    android:id="@+id/tv_num_of_ques_b"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="center"
-                    android:text="10"
+                    android:text="0"
                     android:textColor="@color/black"
                     android:textSize="28sp"
                     android:textStyle="bold" />
@@ -475,7 +495,7 @@
                         android:layout_marginEnd="20dp"
                         android:layout_weight="1"
                         android:gravity="center"
-                        android:text="10"
+                        android:text="30"
                         android:textColor="@color/black"
                         android:textSize="20sp"
                         android:textStyle="bold" />
@@ -483,6 +503,7 @@
                 </LinearLayout>
 
                 <Button
+                    android:id="@+id/btn_start_b"
                     android:layout_width="230dp"
                     android:layout_height="wrap_content"
                     android:layout_alignParentBottom="true"
@@ -495,7 +516,7 @@
                     android:background="@drawable/round_btn"
                     android:paddingLeft="30dp"
                     android:paddingRight="30dp"
-                    android:text="Subscribe to Use"
+                    android:text="Start Quiz"
                     android:textColor="@color/white" />
 
                 <View

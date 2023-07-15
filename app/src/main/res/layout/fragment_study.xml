@@ -21,96 +21,156 @@
             android:orientation="vertical"
             android:padding="10dp">
 
-            <TextView
-                android:id="@+id/tv_add_quiz"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="20dp"
-                android:visibility="gone"
-                android:text="Add Data" />
-            <TextView
-                android:id="@+id/btn_update_exiting_quiz"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="20dp"
-                android:visibility="gone"
-                android:text="Update Data" />
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="50dp"
-                android:text="Good Evening"
-                android:textSize="30dp"
-                android:textStyle="bold" />
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Hey! it's kinda dark"
-                android:textSize="15dp" />
-
-            <androidx.appcompat.widget.LinearLayoutCompat
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="30dp"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="2"
-                    android:text="All Studying"
-                    android:textColor="@color/blue_font"
-                    android:textSize="15dp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="2"
-                    android:text="QotD!"
-                    android:textColor="@color/blue_font"
-                    android:textSize="15dp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="2"
-                    android:text="0 Day Streak"
-                    android:textSize="15dp"
-                    android:textStyle="bold" />
-
-
-            </androidx.appcompat.widget.LinearLayoutCompat>
-
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="@color/gray" />
-
-            <!--
-                        <CalendarView
-                                    android:id="@+id/calendar_view"
-                            style="@style/AppCalendarView"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:background="@color/light_yellow"
-                            android:firstDayOfWeek="2"
-                            android:maxDate="2592000000"
-                            android:scrollbars="none" />
-            -->
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/calendar_view_rv"
-                style="@style/AppCalendarView"
-                android:layout_width="match_parent"
-                android:layout_height="200dp"
-                android:layout_marginTop="20dp"
                 android:background="@color/light_yellow"
-                android:padding="10dp" />
+                android:orientation="vertical">
+                <TextView
+                    android:id="@+id/tv_add_quiz"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="20dp"
+                    android:visibility="gone"
+                    android:text="Add Data" />
+                <TextView
+                    android:id="@+id/btn_update_exiting_quiz"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="20dp"
+                    android:visibility="visible"
+                    android:text="Update Data" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="50dp"
+                    android:text="Good Evening"
+                    android:textSize="30dp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Hey! it's kinda dark"
+                    android:textSize="15dp" />
+
+                <androidx.appcompat.widget.LinearLayoutCompat
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="30dp"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="2"
+                        android:text="All Studying"
+                        android:textColor="@color/blue_font"
+                        android:textSize="15dp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="2"
+                        android:text="QotD!"
+                        android:textColor="@color/blue_font"
+                        android:textSize="15dp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="2"
+                        android:text="0 Day Streak"
+                        android:textSize="15dp"
+                        android:textStyle="bold" />
 
 
+                </androidx.appcompat.widget.LinearLayoutCompat>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@color/gray" />
+
+                <!--
+                            <CalendarView
+                                        android:id="@+id/calendar_view"
+                                style="@style/AppCalendarView"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:background="@color/light_yellow"
+                                android:firstDayOfWeek="2"
+                                android:maxDate="2592000000"
+                                android:scrollbars="none" />
+                -->
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/calendar_view_rv"
+                    style="@style/AppCalendarView"
+                    android:layout_width="match_parent"
+                    android:layout_height="200dp"
+                    android:layout_marginTop="20dp"
+                    android:background="@color/light_yellow"
+                    android:padding="10dp" />
+                <TextView
+                    android:id="@+id/tv_studied_updates"
+                    android:layout_width="match_parent"
+                    android:layout_height="200dp"
+                    android:text="Today is July 11. You have Studied 1 day since July 2. You have 0 day study streak"
+                    android:layout_marginTop="20dp"
+                    android:visibility="gone"
+                    android:padding="10dp" />
+
+                <androidx.appcompat.widget.LinearLayoutCompat
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginBottom="30dp"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:id="@+id/btn_tv_hide"
+                        android:layout_width="25dp"
+                        android:layout_height="25dp"
+                        android:visibility="gone"
+                        android:layout_marginStart="10dp"
+                        android:background="@color/blue_font"
+                        android:src="@drawable/weakest_subject_quiz_white" />
+                    <ImageView
+                        android:id="@+id/btn_tv_show"
+                        android:layout_width="25dp"
+                        android:layout_height="25dp"
+                        android:layout_marginStart="10dp"
+                        android:src="@drawable/weakest_subject_quiz" />
+
+                    <TextView
+                        android:id="@+id/tv_studied"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:text="Key"
+                        android:textSize="15dp"
+                        android:layout_marginLeft="10dp"
+                        android:textStyle="normal" />
+                    <ImageView
+                        android:layout_width="25dp"
+                        android:layout_height="25dp"
+                        android:padding="6dp"
+                        android:src="@drawable/baseline_circle_24" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:text="Studied"
+                        android:textSize="15dp"
+                        android:textStyle="normal" />
+
+
+                </androidx.appcompat.widget.LinearLayoutCompat>
+
+
+            </LinearLayout>
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

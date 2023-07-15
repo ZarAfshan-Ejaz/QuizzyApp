@@ -17,7 +17,9 @@ import com.google.firebase.firestore.FirebaseFirestore
 
 class QuizAdapter(private val quizList: List<QuizModel>) : RecyclerView.Adapter<QuizAdapter.QuizViewHolder>() {
     private var isExplanationVisible = false
-    lateinit var  quiz : QuizModel
+    lateinit var quiz : QuizModel
+     var pre_Poss : Int = 0
+
     inner class QuizViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         // Initialize views in the item layout
         val tv_question: TextView = itemView.findViewById(R.id.tv_question)
@@ -25,29 +27,24 @@ class QuizAdapter(private val quizList: List<QuizModel>) : RecyclerView.Adapter<
 
         val tv_op_a: TextView = itemView.findViewById(R.id.tv_op_a)
         val img_res_op_a: ImageView =itemView.findViewById(R.id.img_res_op_a)
-        val tv_op_a_ans: TextView = itemView.findViewById(R.id.tv_correct_ans_a)
 
         val tv_op_b: TextView = itemView.findViewById(R.id.tv_op_b)
-        val tv_op_b_ans: TextView = itemView.findViewById(R.id.tv_correct_ans_b)
         val img_res_op_b: ImageView =itemView.findViewById(R.id.img_res_op_b)
 
         val tv_op_c: TextView = itemView.findViewById(R.id.tv_op_c)
-        val tv_op_c_ans: TextView = itemView.findViewById(R.id.tv_correct_ans_c)
         val img_res_op_c: ImageView =itemView.findViewById(R.id.img_res_op_c)
 
         val tv_op_d: TextView = itemView.findViewById(R.id.tv_op_d)
-        val tv_op_d_ans: TextView = itemView.findViewById(R.id.tv_correct_ans_d)
         val img_res_op_d: ImageView =itemView.findViewById(R.id.img_res_op_d)
 
-        val llOpDExpShow_a: LinearLayout = itemView.findViewById(R.id.ll_op_a_exp_show)
-        val llOpDExpShow_b: LinearLayout = itemView.findViewById(R.id.ll_op_b_exp_show)
-        val llOpDExpShow_c: LinearLayout = itemView.findViewById(R.id.ll_op_c_exp_show)
-        val llOpDExpShow_d: LinearLayout = itemView.findViewById(R.id.ll_op_d_exp_show)
+        val tv_corr_ans: TextView =itemView.findViewById(R.id.tv_corr_ans)
+        val ll_corr_ans: LinearLayout = itemView.findViewById(R.id.ll_corr_ans)
 
         val ll_main_op_a: LinearLayout = itemView.findViewById(R.id.ll_main_op_a)
         val ll_main_op_b: LinearLayout = itemView.findViewById(R.id.ll_main_op_b)
         val ll_main_op_c: LinearLayout = itemView.findViewById(R.id.ll_main_op_c)
         val ll_main_op_d: LinearLayout = itemView.findViewById(R.id.ll_main_op_d)
+
 
         // val answerTextView: TextView = itemView.findViewById(R.id.answerTextView)
         // ... Add more views as needed
@@ -60,7 +57,16 @@ class QuizAdapter(private val quizList: List<QuizModel>) : RecyclerView.Adapter<
     }
 
     override fun onBindViewHolder(holder: QuizViewHolder, position: Int) {
-        var buttonClicked = false
+
+        if (pre_Poss < position){
+
+            holder.img_res_op_a.visibility = View.GONE
+            holder.img_res_op_b.visibility = View.GONE
+            holder.img_res_op_c.visibility = View.GONE
+            holder.img_res_op_d.visibility = View.GONE
+            holder.ll_corr_ans.visibility = View.GONE
+
+        }
 
         // Bind data to the views in the ViewHolder
          quiz = quizList[position]
@@ -80,32 +86,24 @@ class QuizAdapter(private val quizList: List<QuizModel>) : RecyclerView.Adapter<
         val ans = "$corr_opt\n+$reason"
 
         holder.ll_main_op_a.setOnClickListener(View.OnClickListener {
-            answerSelected(holder,holder.llOpDExpShow_a,holder.img_res_op_a, holder.tv_op_a_ans,corr_opt,holder.tv_op_a.text.toString(),reason,holder.img_res_op_a, false,true)
+            pre_Poss = position
+            answerSelected(holder,holder.img_res_op_a,corr_opt,holder.tv_op_a.text.toString(),reason,holder.img_res_op_a, false,true)
         })
         holder.ll_main_op_b.setOnClickListener(View.OnClickListener {
-            answerSelected(holder,holder.llOpDExpShow_b,holder.img_res_op_b, holder.tv_op_b_ans,corr_opt,holder.tv_op_b.text.toString(),reason,holder.img_res_op_b, false,true)
+            pre_Poss = position
+            answerSelected(holder,holder.img_res_op_b,corr_opt,holder.tv_op_b.text.toString(),reason,holder.img_res_op_b, false,true)
+
         })
         holder.ll_main_op_c.setOnClickListener(View.OnClickListener {
-            answerSelected(holder,holder.llOpDExpShow_c,holder.img_res_op_c, holder.tv_op_c_ans,corr_opt,holder.tv_op_c.text.toString(),reason,holder.img_res_op_c, false,true)
+            pre_Poss = position
+            answerSelected(holder,holder.img_res_op_c,corr_opt,holder.tv_op_c.text.toString(),reason,holder.img_res_op_c, false,true)
         })
         holder.ll_main_op_d.setOnClickListener(View.OnClickListener {
-            answerSelected(holder,holder.llOpDExpShow_d,holder.img_res_op_d, holder.tv_op_d_ans,corr_opt,holder.tv_op_d.text.toString(),reason,holder.img_res_op_d, false,true)
+            pre_Poss = position
+            answerSelected(holder,holder.img_res_op_d,corr_opt,holder.tv_op_d.text.toString(),reason,holder.img_res_op_d, false,true)
         })
 
 
-
-        holder.llOpDExpShow_a.setOnClickListener(View.OnClickListener {
-            toggleExplanation(holder.llOpDExpShow_a,holder.tv_op_a_ans)
-        })
-        holder.llOpDExpShow_b.setOnClickListener(View.OnClickListener {
-            toggleExplanation(holder.llOpDExpShow_b,holder.tv_op_b_ans)
-        })
-        holder.llOpDExpShow_c.setOnClickListener(View.OnClickListener {
-            toggleExplanation(holder.llOpDExpShow_c,holder.tv_op_c_ans)
-        })
-        holder.llOpDExpShow_d.setOnClickListener(View.OnClickListener {
-            toggleExplanation(holder.llOpDExpShow_d,holder.tv_op_d_ans)
-        })
     }
 
     override fun getItemCount(): Int {
@@ -144,31 +142,19 @@ class QuizAdapter(private val quizList: List<QuizModel>) : RecyclerView.Adapter<
 
         if (corr_opt=="option_a"){
             holder.img_res_op_a.setImageResource(R.drawable.right_mark)
-            holder.llOpDExpShow_a.visibility = View.VISIBLE
-            holder.tv_op_a_ans.text = ans
-            holder.tv_op_a_ans.visibility = View.VISIBLE
 
         }else{
             holder.img_res_op_a.visibility = View.VISIBLE
             holder.img_res_op_a.setImageResource(R.drawable.close)
         }
         if (corr_opt =="option_b"){
-            holder.llOpDExpShow_b.visibility = View.VISIBLE
             holder.img_res_op_b.setImageResource(R.drawable.right_mark)
-            holder.tv_op_b_ans.text = ans
-            holder.tv_op_b_ans.visibility = View.VISIBLE
-
-
         }else{
             holder.img_res_op_b.visibility = View.VISIBLE
             holder.img_res_op_b.setImageResource(R.drawable.close)
         }
         if (corr_opt =="option_c"){
-            holder.llOpDExpShow_c.visibility = View.VISIBLE
             holder.img_res_op_c.setImageResource(R.drawable.right_mark)
-            holder.tv_op_c_ans.text = ans
-            holder.tv_op_c_ans.visibility = View.VISIBLE
-
 
         }else{
             holder.img_res_op_c.visibility = View.VISIBLE
@@ -176,9 +162,7 @@ class QuizAdapter(private val quizList: List<QuizModel>) : RecyclerView.Adapter<
         }
         if (corr_opt =="option_d"){
             holder.img_res_op_d.visibility = View.VISIBLE
-            holder.llOpDExpShow_d.visibility = View.VISIBLE
             holder.img_res_op_d.setImageResource(R.drawable.right_mark)
-            holder.tv_op_d_ans.text = ans
 
         }else{
             holder.img_res_op_d.visibility = View.VISIBLE
@@ -186,96 +170,10 @@ class QuizAdapter(private val quizList: List<QuizModel>) : RecyclerView.Adapter<
         }
 
     }
-    fun showWrongOptn(holder: QuizViewHolder, corr_opt:String?, ans:String){
 
-        when (corr_opt){
-            "option_a" ->{
-                holder.img_res_op_a.setImageResource(R.drawable.right_mark)
-                holder.llOpDExpShow_a.visibility = View.VISIBLE
-                holder.llOpDExpShow_b.visibility = View.GONE
-                holder.llOpDExpShow_c.visibility = View.GONE
-                holder.llOpDExpShow_d.visibility = View.GONE
-
-            }
-            "option_b" ->{
-                holder.llOpDExpShow_b.visibility = View.VISIBLE
-                holder.img_res_op_b.setImageResource(R.drawable.right_mark)
-                holder.llOpDExpShow_a.visibility = View.GONE
-                holder.llOpDExpShow_c.visibility = View.GONE
-                holder.llOpDExpShow_d.visibility = View.GONE
-            }
-            "option_c" ->{
-                holder.llOpDExpShow_c.visibility = View.VISIBLE
-                holder.img_res_op_c.setImageResource(R.drawable.right_mark)
-                holder.llOpDExpShow_a.visibility = View.GONE
-                holder.llOpDExpShow_b.visibility = View.GONE
-                holder.llOpDExpShow_d.visibility = View.GONE
-
-            }
-            "option_d" ->{
-                holder.img_res_op_d.visibility = View.VISIBLE
-                holder.llOpDExpShow_d.visibility = View.VISIBLE
-                holder.llOpDExpShow_a.visibility = View.GONE
-                holder.llOpDExpShow_b.visibility = View.GONE
-                holder.llOpDExpShow_c.visibility = View.GONE
-
-            }
-        }
-
-        freezTheResult(holder)
-
-    }
-/*
-    fun showRightOptn(holder: QuizViewHolder, corr_opt:String?, ans:String){
-
-        when (corr_opt){
-            "option_a" ->{
-                holder.img_res_op_a.setImageResource(R.drawable.right_mark)
-                holder.img_res_op_a.visibility = View.VISIBLE
-                holder.llOpDExpShow_a.visibility = View.VISIBLE
-                holder.llOpDExpShow_b.visibility = View.GONE
-                holder.llOpDExpShow_c.visibility = View.GONE
-                holder.llOpDExpShow_d.visibility = View.GONE
-
-            }
-            "option_b" ->{
-                holder.llOpDExpShow_b.visibility = View.VISIBLE
-                holder.img_res_op_b.visibility = View.VISIBLE
-                holder.img_res_op_b.setImageResource(R.drawable.right_mark)
-                holder.llOpDExpShow_a.visibility = View.GONE
-                holder.llOpDExpShow_c.visibility = View.GONE
-                holder.llOpDExpShow_d.visibility = View.GONE
-            }
-            "option_c" ->{
-                holder.llOpDExpShow_c.visibility = View.VISIBLE
-                holder.img_res_op_c.visibility = View.VISIBLE
-
-                holder.img_res_op_c.setImageResource(R.drawable.right_mark)
-                holder.llOpDExpShow_a.visibility = View.GONE
-                holder.llOpDExpShow_b.visibility = View.GONE
-                holder.llOpDExpShow_d.visibility = View.GONE
-
-            }
-            "option_d" ->{
-                holder.img_res_op_d.visibility = View.VISIBLE
-                holder.img_res_op_d.setImageResource(R.drawable.right_mark)
-                holder.llOpDExpShow_d.visibility = View.VISIBLE
-                holder.llOpDExpShow_a.visibility = View.GONE
-                holder.llOpDExpShow_b.visibility = View.GONE
-                holder.llOpDExpShow_c.visibility = View.GONE
-
-            }
-        }
-
-        freezTheResult(holder)
-
-    }
-*/
   fun answerSelected(
           holder: QuizViewHolder,
-          llOpDExpShow_c : LinearLayout,
           img_res : ImageView,
-          tv_answer:TextView,
           answer:String?,
           selected_op : String?,
           reason : String?,
@@ -286,11 +184,12 @@ class QuizAdapter(private val quizList: List<QuizModel>) : RecyclerView.Adapter<
   ){
     val correct:Boolean
 
+    holder.ll_corr_ans.visibility = View.VISIBLE
+    holder.tv_corr_ans.text = "Answer :\n"+"$answer\n$reason"
+
     if (selected_op == answer){
-          llOpDExpShow_c.visibility = View.VISIBLE
-          img_res.setImageResource(R.drawable.right_mark)
-          tv_answer.text = reason
-          tv_answer.visibility = View.VISIBLE
+        img_res.visibility = View.VISIBLE
+        img_res.setImageResource(R.drawable.right_mark)
           correct = true
 
       }else{
@@ -302,6 +201,9 @@ class QuizAdapter(private val quizList: List<QuizModel>) : RecyclerView.Adapter<
       freezTheResult(holder)
       submitQuiz(quiz,selected_op, flagged,correct,attempted)
 
+
+    }
+
   }
     fun submitQuiz(
             quizModel: QuizModel,
@@ -310,8 +212,8 @@ class QuizAdapter(private val quizList: List<QuizModel>) : RecyclerView.Adapter<
             correct: Boolean?,
             attempted: Boolean?
     ) {
-        val firebaseAuth: FirebaseAuth = FirebaseAuth.getInstance()
-        val user_id: String? = firebaseAuth.currentUser?.uid
+            val firebaseAuth: FirebaseAuth = FirebaseAuth.getInstance()
+            val user_id: String? = firebaseAuth.currentUser?.uid
 
         val firestore = FirebaseFirestore.getInstance()
 
@@ -343,4 +245,4 @@ class QuizAdapter(private val quizList: List<QuizModel>) : RecyclerView.Adapter<
                 }
     }
 
-}
+

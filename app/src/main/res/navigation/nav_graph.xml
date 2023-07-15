@@ -70,6 +70,9 @@
         <action
             android:id="@+id/action_studyFragment_to_quizFragment"
             app:destination="@id/quizFragment" />
+        <action
+            android:id="@+id/action_studyFragment_to_buildYourOwnQuestionDialog"
+            app:destination="@id/buildYourOwnQuestionDialog" />
     </fragment>
 
     <fragment
@@ -196,4 +199,13 @@
         android:name="com.codingstuff.quizzyapp.ui.dialogs.SwitchExamDialogFragment"
         android:label="switch_exam_dialog_fragment"
         tools:layout="@layout/switch_exam_dialog_fragment" />
+    <fragment
+        android:id="@+id/buildYourOwnQuestionDialog"
+        android:name="com.codingstuff.quizzyapp.ui.dialogs.BuildYourOwnQuestionDialog"
+        android:label="build_your_own_questions_dialog"
+        tools:layout="@layout/build_your_own_questions_dialog" >
+        <action
+            android:id="@+id/action_buildYourOwnQuestionDialog_to_quizFragment2"
+            app:destination="@id/quizFragment" />
+    </fragment>
 </navigation>
