@@ -11,6 +11,7 @@ import java.util.*
 class CalendarAdapter(private val context: Context) : RecyclerView.Adapter<CalendarAdapter.DateViewHolder>() {
     private val dates: MutableList<Date> = mutableListOf()
     private val dayNames = arrayOf("S", "M", "T", "W", "T", "F", "S")
+    private var currentDate: Date? = null
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): DateViewHolder {
         val view = LayoutInflater.from(context).inflate(R.layout.item_date, parent, false)
@@ -29,7 +30,11 @@ class CalendarAdapter(private val context: Context) : RecyclerView.Adapter<Calen
         } else {
             holder.textDayName.visibility = View.GONE
         }
-
+        if (dates[position] == currentDate) {
+            holder.textDate.setBackgroundResource(R.drawable.circle_background)
+        } else {
+            holder.textDate.setBackgroundResource(0)
+        }
         // Set the date
         holder.textDate.text = day
 
@@ -67,6 +72,9 @@ class CalendarAdapter(private val context: Context) : RecyclerView.Adapter<Calen
         dates.clear()
         dates.addAll(newDates)
         notifyDataSetChanged()
+    }
+    fun setCurrentDate(date: Date) {
+        currentDate = date
     }
 
     inner class DateViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {

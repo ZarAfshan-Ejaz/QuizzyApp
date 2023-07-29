@@ -2,6 +2,7 @@ package com.codingstuff.quizzyapp.Adapter
 
 import android.content.ContentValues
 import android.content.ContentValues.TAG
+import android.content.Context
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -10,16 +11,21 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.codingstuff.quizzyapp.BaseActivity
 import com.codingstuff.quizzyapp.Model.QuizModel
 import com.codingstuff.quizzyapp.R
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
-class QuizAdapter(private val quizList: List<QuizModel>) : RecyclerView.Adapter<QuizAdapter.QuizViewHolder>() {
+class QuizAdapter(private val quizList: List<QuizModel>, quizCat:String?, context: Context) : RecyclerView.Adapter<QuizAdapter.QuizViewHolder>() {
     private var isExplanationVisible = false
     lateinit var quiz : QuizModel
      var pre_Poss : Int = 0
-
+    val context =context
+    val quizCat = quizCat
     inner class QuizViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         // Initialize views in the item layout
         val tv_question: TextView = itemView.findViewById(R.id.tv_question)
@@ -87,20 +93,20 @@ class QuizAdapter(private val quizList: List<QuizModel>) : RecyclerView.Adapter<
 
         holder.ll_main_op_a.setOnClickListener(View.OnClickListener {
             pre_Poss = position
-            answerSelected(holder,holder.img_res_op_a,corr_opt,holder.tv_op_a.text.toString(),reason,holder.img_res_op_a, false,true)
+            answerSelected(holder,holder.img_res_op_a,corr_opt,holder.tv_op_a.text.toString(),reason,holder.img_res_op_a, "","true")
         })
         holder.ll_main_op_b.setOnClickListener(View.OnClickListener {
             pre_Poss = position
-            answerSelected(holder,holder.img_res_op_b,corr_opt,holder.tv_op_b.text.toString(),reason,holder.img_res_op_b, false,true)
+            answerSelected(holder,holder.img_res_op_b,corr_opt,holder.tv_op_b.text.toString(),reason,holder.img_res_op_b, "","true")
 
         })
         holder.ll_main_op_c.setOnClickListener(View.OnClickListener {
             pre_Poss = position
-            answerSelected(holder,holder.img_res_op_c,corr_opt,holder.tv_op_c.text.toString(),reason,holder.img_res_op_c, false,true)
+            answerSelected(holder,holder.img_res_op_c,corr_opt,holder.tv_op_c.text.toString(),reason,holder.img_res_op_c, "","true")
         })
         holder.ll_main_op_d.setOnClickListener(View.OnClickListener {
             pre_Poss = position
-            answerSelected(holder,holder.img_res_op_d,corr_opt,holder.tv_op_d.text.toString(),reason,holder.img_res_op_d, false,true)
+            answerSelected(holder,holder.img_res_op_d,corr_opt,holder.tv_op_d.text.toString(),reason,holder.img_res_op_d, "","true")
         })
 
 
@@ -178,11 +184,11 @@ class QuizAdapter(private val quizList: List<QuizModel>) : RecyclerView.Adapter<
           selected_op : String?,
           reason : String?,
           img_wrng_right:ImageView,
-          flagged: Boolean,
-          attempted:Boolean
+          flagged: String,
+          attempted:String
 
   ){
-    val correct:Boolean
+    val correct:String
 
     holder.ll_corr_ans.visibility = View.VISIBLE
     holder.tv_corr_ans.text = "Answer :\n"+"$answer\n$reason"
@@ -190,53 +196,59 @@ class QuizAdapter(private val quizList: List<QuizModel>) : RecyclerView.Adapter<
     if (selected_op == answer){
         img_res.visibility = View.VISIBLE
         img_res.setImageResource(R.drawable.right_mark)
-          correct = true
+          correct = "true"
 
       }else{
           img_wrng_right.visibility = View.VISIBLE
           img_wrng_right.setImageResource(R.drawable.close)
-        correct = false
+        correct = "false"
 
     }
       freezTheResult(holder)
-      submitQuiz(quiz,selected_op, flagged,correct,attempted)
 
+      val quizModelData = QuizModel(
+              questionId = quiz.questionId,
+              answer = quiz.answer,
+              question = quiz.question,
+              reason = quiz.reason,
+              option_a = quiz.option_a,
+              option_b = quiz.option_b,
+              option_c = quiz.option_c,
+              option_d = quiz.option_d,
+              domain = quiz.domain,
+              domain_name = quiz.domain_name,
+              subject = quiz.subject,
+              select_opt = selected_op,
+              flagged = flagged,
+              correct = correct,
+              attempted = attempted,
+              date = getCurrentTime(),
+              quizCat = quizCat
+      )
+
+
+      submitQuiz(quizModelData)
 
     }
 
-  }
     fun submitQuiz(
             quizModel: QuizModel,
-            selected_op: String?,
-            flagged: Boolean?,
-            correct: Boolean?,
-            attempted: Boolean?
     ) {
-            val firebaseAuth: FirebaseAuth = FirebaseAuth.getInstance()
-            val user_id: String? = firebaseAuth.currentUser?.uid
-
-        val firestore = FirebaseFirestore.getInstance()
+        val firebaseAuth: FirebaseAuth = FirebaseAuth.getInstance()
+        val user_id: String? = firebaseAuth.currentUser?.uid
+        val fireStore = FirebaseFirestore.getInstance()
 
         val questionId = quizModel.questionId
-        val collectionPath = "/users/$user_id/history/$questionId"
+        var collectionPath = ""
 
-        val quizModelData = QuizModel(
-                questionId = questionId,
-                answer = quizModel.answer,
-                question = quizModel.question,
-                reason = quizModel.reason,
-                option_a = quizModel.option_a,
-                option_b = quizModel.option_b,
-                option_c = quizModel.option_c,
-                option_d = quizModel.option_d,
-                select_opt = selected_op,
-                flagged = flagged,
-                correct = correct,
-                attempted = attempted
-        )
+        if (quizModel.quizCat == "QotD"){
+            collectionPath = "/users/$user_id/history_of_QotD/$questionId"
+        }else{
+            collectionPath = "/users/$user_id/history/$questionId"
+        }
 
-        val documentRef = firestore.document(collectionPath)
-        documentRef.set(quizModelData)
+        val documentRef = fireStore.document(collectionPath)
+        documentRef.set(quizModel)
                 .addOnSuccessListener {
                     Log.d(TAG, "Quiz document added with ID: $questionId")
                 }
@@ -244,5 +256,12 @@ class QuizAdapter(private val quizList: List<QuizModel>) : RecyclerView.Adapter<
                     Log.e(TAG, "Error adding quiz document: $e")
                 }
     }
+    fun getCurrentTime(): String {
+        val dateFormat = SimpleDateFormat("dd-MM-yyyy, HH:mm:ss", Locale.getDefault())
+        val currentTime = Date()
+        return dateFormat.format(currentTime)
+    }
+
+}
 
 

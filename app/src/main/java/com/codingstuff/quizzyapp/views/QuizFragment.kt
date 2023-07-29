@@ -1,9 +1,13 @@
 package com.codingstuff.quizzyapp.views
 
+import android.content.ContentValues
 import android.content.ContentValues.TAG
+import android.content.Context
 import android.graphics.Color
 import android.os.Bundle
 import android.os.CountDownTimer
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -17,19 +21,31 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.codingstuff.quizzyapp.Adapter.QuizAdapter
 import com.codingstuff.quizzyapp.Adapter.RecyclerViewAdapter
+import com.codingstuff.quizzyapp.BaseActivity
 import com.codingstuff.quizzyapp.Model.QuizModel
 import com.codingstuff.quizzyapp.R
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.gson.Gson
+import java.util.Calendar
 
 class QuizFragment : Fragment() {
+    val firebaseAuth: FirebaseAuth = FirebaseAuth.getInstance()
+    val user_id: String? = firebaseAuth.currentUser?.uid
+    val firestore = FirebaseFirestore.getInstance()
+
+    var no_Of_Quiz : Int? = 0
     private lateinit var countdownTimer: CountDownTimer
-    val quizList = mutableListOf<QuizModel>()
+    var quizList = mutableListOf<QuizModel>()
+    var weakest_SUB_LIST: MutableList<QuizModel> = mutableListOf()
+
     private var recyclerView: RecyclerView? = null
     private var leftArrow: ImageButton? = null
     private var rightArrow: ImageButton? = null
     lateinit var tv_timer: TextView
     lateinit var btn_submit: Button
+    var quiz_CAT: String? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -50,66 +66,84 @@ class QuizFragment : Fragment() {
         val args = arguments
         val startTimer = args?.getBoolean("START_TIMER")
         val millisecondsSelected = args?.getLong("millisecondsSelected")
-        val no_Of_Quiz = args?.getInt("NO_Of_Quiz")
-        val quiz_CAT = args?.getString("QUIZ_CAT")
+         no_Of_Quiz = args?.getInt("NO_Of_Quiz")
+        quiz_CAT = args?.getString("QUIZ_CAT")
         val finalCombinationList = arguments?.getSerializable("FINAL_COMBINATION_LIST") as? ArrayList<QuizModel>
+        val weakest_SUB_LIST = arguments?.getSerializable("WEAKEST_SUB_LIST") as? ArrayList<QuizModel>
+        val missed_quiz_list = arguments?.getSerializable("MISSED_QUIZ_LIST") as? ArrayList<QuizModel>
+        val qotd_quiz = arguments?.getSerializable("QotD") as? ArrayList<QuizModel>
+        val quick_10_quiz_list = arguments?.getSerializable("QUICK_10_QUIZ_LIST") as? ArrayList<QuizModel>
 
-        if (quiz_CAT == "weakest_sub") {
-            if (no_Of_Quiz != null) {
-                weakestSubject(no_Of_Quiz)
+        if (quiz_CAT == "WEAKEST_SUBJECT") {
+            tv_timer.visibility = View.GONE
+            quizList.clear()
+            if (weakest_SUB_LIST != null) {
+                quizList.clear()
+                quizList =weakest_SUB_LIST
+
+                show_btn_submit()
             }
         }
-        if (quiz_CAT == "timed_quiz") {
+        if (quiz_CAT == "TIMED_QUIZ") {
             if (millisecondsSelected != null) {
                 startTimer(millisecondsSelected)
+                quizList.clear()
                 getQuiz()
+                show_btn_submit()
             }
         }
-        if (quiz_CAT == "your_owen_quiz") {
-            tv_timer?.visibility = View.GONE
+        if (quiz_CAT == "YOUR_OWN_QUIZ") {
+            tv_timer.visibility = View.GONE
 
             if (finalCombinationList != null) {
-                val quizAdapter = QuizAdapter(finalCombinationList)
-                recyclerView!!.adapter = quizAdapter
-              //  collectAndStoreDocuments(finalCombinationList)
+                quizList.clear()
+                quizList = finalCombinationList
+                show_btn_submit()
             }
         }
-        if (quiz_CAT == "missed_quiz") {
-            if (no_Of_Quiz != null) {
-                getMissedQuiz(no_Of_Quiz)
-
+        if (quiz_CAT == "MISSED_QUIZ") {
+            tv_timer?.visibility = View.GONE
+            if (missed_quiz_list != null) {
+                quizList.clear()
+                quizList=missed_quiz_list
+                show_btn_submit()
             }
         }
         if (quiz_CAT == "QUICK_10_QUIZ") {
             tv_timer?.visibility = View.GONE
-            getRandomQuestions()
+            if (quick_10_quiz_list != null) {
+                quizList.clear()
+                quizList=quick_10_quiz_list
+                show_btn_submit()
+            }
+
         }
         if (quiz_CAT == "QotD") {
             rightArrow?.visibility = View.GONE
             leftArrow?.visibility = View.GONE
             tv_timer?.visibility = View.GONE
-
-            question_of_the_day()
+            btn_submit?.visibility = View.VISIBLE
+            quizList.clear()
+            //question_of_the_day()
+            if (qotd_quiz != null) {
+                quizList.clear()
+                quizList= qotd_quiz
+                show_btn_submit()
+            }
         }
+        btn_submit.setOnClickListener(View.OnClickListener {
+            //updateSubmittedQuiz(quiz_CAT)
+            Toast.makeText(context, "Submitted Successfully", Toast.LENGTH_SHORT).show()
+
+        })
         leftArrow!!.setOnClickListener(View.OnClickListener { scrollRecyclerView(-1) })
         rightArrow!!.setOnClickListener(View.OnClickListener { scrollRecyclerView(1) })
         // Create a LinearLayoutManager and set it as the layout manager for the RecyclerView
         val layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
         recyclerView!!.setLayoutManager(layoutManager)
-
-        // Create an array of items for the RecyclerView
-        val items = arrayOf("Item 1", "Item 2", "Item 3", "Item 4", "Item 5")
-
-        // Create the adapter and set it to the RecyclerView
-        //val adapter = RecyclerViewAdapter(items)
-        //recyclerView!!.setAdapter(adapter)
-        //getQuiz()
-        // getRandomQuestions()
         return view
     }
-
     private fun question_of_the_day() {
-        val firestore = FirebaseFirestore.getInstance()
         val collectionPath = "/Exams/ComputerScience/Questions"
         val collectionRef = firestore.collection(collectionPath)
 
@@ -118,14 +152,62 @@ class QuizFragment : Fragment() {
 
             val shuffledQuestions = allQuestions.shuffled()
             val randomQuestions = shuffledQuestions.take(1)
-
-            val quizAdapter = QuizAdapter(randomQuestions)
+            quizList = randomQuestions as MutableList<QuizModel>
+            val quizAdapter = QuizAdapter(quizList, quiz_CAT, requireContext())
             recyclerView!!.adapter = quizAdapter
-            collectAndStoreDocuments(randomQuestions)
+
         }.addOnFailureListener { exception ->
             Log.e(TAG, "Error getting quiz documents: $exception")
         }
     }
+/*
+//fetch quiz randomly according to the date
+    fun fetch_New_QotD_Quiz() {
+        val quizList_A = mutableListOf<QuizModel>()
+        val new_quiz_list = mutableListOf<QuizModel>()
+
+        // Fetch document IDs for quizList_A
+        val collectionRef_A = firestore.collection("/users/$user_id/history_of_QotD")
+        collectionRef_A.whereEqualTo("correct","true").get().addOnSuccessListener { querySnapshot ->
+            for (document in querySnapshot.documents) {
+                val documentId = document.id
+                // Skip if the document ID is already present in quizList_A
+                if (quizList_A.none { it.questionId == documentId }) {
+                    //val quizModel = QuizModel(questionId = documentId)
+                    //quizList_A.add(quizModel)
+                    val quiz = document.toObject(QuizModel::class.java)
+                    quizList_A.add(quiz!!)
+                }
+            }
+        }.addOnFailureListener { exception ->
+            Log.e(TAG, "Error getting documents for path_A: $exception")
+        }
+
+        // Fetch document IDs for quizList_B
+        val collectionRef_B = firestore.collection("/Exams/ComputerScience/Questions")
+        collectionRef_B.get().addOnSuccessListener { querySnapshot ->
+            for (document in querySnapshot.documents) {
+                val documentId = document.id
+                // Skip if the document ID is already present in quizList_A
+                if (quizList_A.none { it.questionId == documentId }) {
+                   // val quizModel = QuizModel(questionId = documentId)
+                    //new_quiz_list.add(quizModel)
+                    val quiz = document.toObject(QuizModel::class.java)
+                    new_quiz_list.add(quiz!!)
+                }
+            }
+            val shuffledQuestions = new_quiz_list.shuffled()
+            val randomQuestions = shuffledQuestions.take(1)
+            quizList = randomQuestions as MutableList<QuizModel>
+            val quizAdapter = QuizAdapter(quizList, quiz_CAT, requireContext())
+            recyclerView!!.adapter = quizAdapter
+            Toast.makeText(context, "ID: ${quizList.get(0).questionId}", Toast.LENGTH_SHORT).show()
+
+        }.addOnFailureListener { exception ->
+            Log.e(TAG, "Error getting documents for path_B: $exception")
+        }
+    }
+*/
 
     private fun scrollRecyclerView(direction: Int) {
         val layoutManager = recyclerView!!.layoutManager as LinearLayoutManager?
@@ -148,6 +230,16 @@ class QuizFragment : Fragment() {
     }
 
 
+    fun show_btn_submit(){
+        if (quizList.size == 1){
+            btn_submit.visibility = View.VISIBLE
+            leftArrow?.visibility = View.GONE
+            rightArrow?.visibility = View.GONE
+        }
+        val quizAdapter = QuizAdapter(quizList, quiz_CAT, requireContext())
+        recyclerView!!.adapter = quizAdapter
+    }
+
     companion object {
         fun newInstance(param1: String?, param2: String?): QuizFragment {
             val fragment = QuizFragment()
@@ -159,74 +251,30 @@ class QuizFragment : Fragment() {
 
     //real time quizz
     fun getQuiz() {
-        val firestore = FirebaseFirestore.getInstance()
         val collectionPath = "/Exams/ComputerScience/Questions"
         val collectionRef = firestore.collection(collectionPath)
 
         collectionRef.get().addOnSuccessListener { querySnapshot ->
-            val quizList = mutableListOf<QuizModel>()
 
             for (document in querySnapshot) {
                 val quiz = document.toObject(QuizModel::class.java)
                 quizList.add(quiz)
             }
 
-            val quizAdapter = QuizAdapter(quizList)
+            val quizAdapter = QuizAdapter(quizList, quiz_CAT, requireContext())
             recyclerView!!.adapter = quizAdapter
-            collectAndStoreDocuments(quizList)
 
         }.addOnFailureListener { exception ->
             Log.e(TAG, "Error getting quiz documents: $exception")
         }
     }
 
-    fun getMissedQuiz(no_of_quiz : Int) {
-        val firestore = FirebaseFirestore.getInstance()
-        val collectionPath = "/users/G897SE6IwSfSgpqiISIGNCBmSrI3/history"
-        val collectionRef = firestore.collection(collectionPath)
 
-        collectionRef.limit(no_of_quiz.toLong())
-                .get()
-                .addOnSuccessListener { querySnapshot ->
-                    val quizList = mutableListOf<QuizModel>()
-
-                    for (document in querySnapshot) {
-                        val quiz = document.toObject(QuizModel::class.java)
-                        quizList.add(quiz)
-                    }
-
-                    val quizAdapter = QuizAdapter(quizList)
-                    recyclerView!!.adapter = quizAdapter
-                    collectAndStoreDocuments(quizList)
-
-                }
-                .addOnFailureListener { exception ->
-                    Log.e(TAG, "Error getting quiz documents: $exception")
-                }
-    }
-
-    fun getRandomQuestions() {
-        val firestore = FirebaseFirestore.getInstance()
-        val collectionPath = "/Exams/ComputerScience/Questions"
-        val collectionRef = firestore.collection(collectionPath)
-
-        collectionRef.get().addOnSuccessListener { querySnapshot ->
-            val allQuestions = querySnapshot.toObjects(QuizModel::class.java)
-
-            val shuffledQuestions = allQuestions.shuffled()
-            val randomQuestions = shuffledQuestions.take(10)
-
-            val quizAdapter = QuizAdapter(randomQuestions)
-            recyclerView!!.adapter = quizAdapter
-            collectAndStoreDocuments(randomQuestions)
-        }.addOnFailureListener { exception ->
-            Log.e(TAG, "Error getting quiz documents: $exception")
-        }
-    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
     }
+
     fun startTimer(totalTimeMillis: Long) {
         countdownTimer = object : CountDownTimer(totalTimeMillis, 1000) {
             override fun onTick(millisUntilFinished: Long) {
@@ -243,6 +291,10 @@ class QuizFragment : Fragment() {
 
             override fun onFinish() {
                 tv_timer.text = "Time's Up!"
+                quizList.clear()
+                quizList = (requireContext() as BaseActivity).attemptedTimeQuiz
+                btn_submit.visibility = View.VISIBLE
+
                 tv_timer.setTextColor(Color.RED)
                 rightArrow?.isClickable = false
                 leftArrow?.isClickable = false
@@ -269,7 +321,6 @@ class QuizFragment : Fragment() {
     }
 
     fun updateExistingDocuments() {
-        val firestore = FirebaseFirestore.getInstance()
         val collectionPath = "/Exams/ComputerScience/Questions"
         val collectionRef = firestore.collection(collectionPath)
 
@@ -293,18 +344,15 @@ class QuizFragment : Fragment() {
     }
 
     fun collectAndStoreDocuments(quizList: List<QuizModel>) {
-        val firebaseAuth: FirebaseAuth = FirebaseAuth.getInstance()
-        val user_id: String? = firebaseAuth.currentUser?.uid
 
-        val firestore = FirebaseFirestore.getInstance()
 
         val destinationCollectionRef = firestore.collection("/users/$user_id/history/")
 
         for (quiz in quizList) {
             // Modify the values of attempted, correct, and flag fields
-            quiz.attempted = false
-            quiz.correct = false
-            quiz.flagged = false
+            quiz.attempted = ""
+            quiz.correct = ""
+            quiz.flagged = ""
 
             val documentId = quiz.questionId
 
@@ -319,28 +367,6 @@ class QuizFragment : Fragment() {
             }
         }
     }
-    private fun weakestSubject(no_of_quiz: Int) {
-        val firestore = FirebaseFirestore.getInstance()
-        val collectionRef = firestore.collection("/users/G897SE6IwSfSgpqiISIGNCBmSrI3/history")
 
-
-        collectionRef.limit(no_of_quiz.toLong()).whereEqualTo("correct", false)
-                .get()
-                .addOnSuccessListener { querySnapshot ->
-                    for (document in querySnapshot.documents) {
-                        val quizModel = document.toObject(QuizModel::class.java)
-                        quizList.add(quizModel!!)
-                    }
-                    // Perform further operations with the quizList containing the documents
-                    val quizAdapter = QuizAdapter(quizList)
-                    recyclerView!!.adapter = quizAdapter
-                    Toast.makeText(requireContext(),quizList.size.toString(),Toast.LENGTH_LONG).show()
-                }
-                .addOnFailureListener { exception ->
-                    // Handle the error
-                    Log.e(TAG, "Error fetching documents: $exception")
-                }
-
-    }
 
 }

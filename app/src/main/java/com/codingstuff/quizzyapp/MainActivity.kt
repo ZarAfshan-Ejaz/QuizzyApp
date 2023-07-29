@@ -5,9 +5,10 @@ import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
+import com.codingstuff.quizzyapp.views.StudyFragment
 import com.google.android.material.bottomnavigation.BottomNavigationView
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : BaseActivity() {
     private var navController: NavController? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -35,8 +36,17 @@ class MainActivity : AppCompatActivity() {
 
         /////////////////////////////////////////////
         val navHostFragment = supportFragmentManager.findFragmentById(R.id.nav_host_fragment_2) as NavHostFragment?
-        navController = navHostFragment!!.navController
+
+        navController?.addOnDestinationChangedListener { _, destination, _ ->
+            if (destination.id == R.id.studyFragment) {
+                // Call the refresh method of StudyFragment here
+                val studyFragment = supportFragmentManager.findFragmentByTag("StudyFragment") as StudyFragment?
+                studyFragment?.refreshFragment()
+            }
+        }
         //navigateToAnotherFragment();
+        navController = navHostFragment!!.navController
+
     }
 
     override fun onBackPressed() {

@@ -18,12 +18,17 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.NavController
 import androidx.navigation.Navigation
 import androidx.recyclerview.widget.RecyclerView
+import com.codingstuff.quizzyapp.Adapter.QuizAdapter
 import com.codingstuff.quizzyapp.Model.QuizModel
 import com.codingstuff.quizzyapp.R
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 
 class BuildYourOwnQuestionDialog : Fragment() {
+    val firebaseAuth: FirebaseAuth = FirebaseAuth.getInstance()
+    val user_id: String? = firebaseAuth.currentUser?.uid
+    val firestore = FirebaseFirestore.getInstance()
+
     lateinit var tv_num_of_ques: TextView
     lateinit var tv_new_ques: TextView
     lateinit var tv_missed_ques: TextView
@@ -60,9 +65,9 @@ class BuildYourOwnQuestionDialog : Fragment() {
         // Set up other components and listeners as needed
         builder.setView(view)
         fetch_New_Quiz()
-        fetchSpecificQuiz("flagged", true,tv_flagged_ques, quizList_flagged)
-        fetchSpecificQuiz("attempted", false, tv_missed_ques,quizList_missed)
-        fetchSpecificQuiz("attempted", true,tv_answered_ques, quizList_answered)
+        fetchSpecificQuiz("flagged", "true",tv_flagged_ques, quizList_flagged)
+        fetchSpecificQuiz("correct", "false", tv_missed_ques,quizList_missed)
+        fetchSpecificQuiz("attempted", "true",tv_answered_ques, quizList_answered)
 
         return view
     }
@@ -113,7 +118,7 @@ private fun init(view: View){
 
             val no_of_quiz = seekBar.progress
             val bundle = Bundle()
-            bundle.putString("QUIZ_CAT", "your_owen_quiz")
+            bundle.putString("QUIZ_CAT", "YOUR_OWN_QUIZ")
           //  bundle.putInt("NO_Of_Quiz", no_of_quiz)
             bundle.putSerializable("FINAL_COMBINATION_LIST", ArrayList(finalCombinationList))
 
@@ -163,12 +168,12 @@ private fun init(view: View){
 
 }
 
+
     fun fetch_New_Quiz() {
         val quizList_A = mutableListOf<QuizModel>()
-        val firestore = FirebaseFirestore.getInstance()
 
         // Fetch document IDs for quizList_A
-        val collectionRef_A = firestore.collection("/users/G897SE6IwSfSgpqiISIGNCBmSrI3/history")
+        val collectionRef_A = firestore.collection("/users/$user_id/history")
         collectionRef_A.get().addOnSuccessListener { querySnapshot ->
             for (document in querySnapshot.documents) {
                 val documentId = document.id
@@ -176,6 +181,8 @@ private fun init(view: View){
                 if (quizList_A.none { it.questionId == documentId }) {
                     val quizModel = QuizModel(questionId = documentId)
                     quizList_A.add(quizModel)
+                    val quiz = document.toObject(QuizModel::class.java)
+                    quizList_A.add(quiz!!)
                 }
             }
         }.addOnFailureListener { exception ->
@@ -200,6 +207,7 @@ private fun init(view: View){
     }
 
     fun processQuizListA(quizList: MutableList<QuizModel>) {
+        val uidd = firebaseAuth.uid
 
 
         val newQuizSize = quizList.size
@@ -210,10 +218,7 @@ private fun init(view: View){
     }
 
     fun getSpecificQuizzes(key: String, value: Boolean): String {
-        val firebaseAuth: FirebaseAuth = FirebaseAuth.getInstance()
-        val user_id: String? = firebaseAuth.currentUser?.uid
 
-        val firestore = FirebaseFirestore.getInstance()
         val collectionPath = "/users/$user_id/history"
         val collectionRef = firestore.collection(collectionPath)
         val flaggedQuizList = mutableListOf<QuizModel>()
@@ -232,10 +237,7 @@ private fun init(view: View){
     }
 
     fun getFlaggedQuizzes(key: String, value: Boolean): List<QuizModel> {
-        val firebaseAuth: FirebaseAuth = FirebaseAuth.getInstance()
-        val user_id: String? = firebaseAuth.currentUser?.uid
 
-        val firestore = FirebaseFirestore.getInstance()
         val collectionPath = "/users/$user_id/history"
         val collectionRef = firestore.collection(collectionPath)
         val flaggedQuizList = mutableListOf<QuizModel>()
@@ -257,10 +259,7 @@ private fun init(view: View){
     }
 
     fun getFlaggedQuizzes(key: String, value: Boolean, callback: (String) -> Unit) {
-        val firebaseAuth: FirebaseAuth = FirebaseAuth.getInstance()
-        val user_id: String? = firebaseAuth.currentUser?.uid
 
-        val firestore = FirebaseFirestore.getInstance()
         val collectionPath = "/users/$user_id/history"
         val collectionRef = firestore.collection(collectionPath)
         val flaggedQuizList = mutableListOf<QuizModel>()
@@ -286,10 +285,7 @@ private fun init(view: View){
     fun fetchAttemptedQuizzes(key: String, value: Boolean): String {
         val attemptedQuizList = mutableListOf<QuizModel>()
 
-        val firebaseAuth: FirebaseAuth = FirebaseAuth.getInstance()
-        val user_id: String? = firebaseAuth.currentUser?.uid
 
-        val firestore = FirebaseFirestore.getInstance()
         val collectionPath = "/users/$user_id/history/"
         val collectionRef = firestore.collection(collectionPath)
 
@@ -326,7 +322,7 @@ private fun init(view: View){
             Log.e(TAG, "Error getting quiz documents: $exception")
         }
         for (quiz in quizList) {
-            if (quiz.attempted == true) {
+            if (quiz.attempted == "true") {
                 attemptedList.add(quiz)
             }
         }
@@ -357,9 +353,9 @@ private fun init(view: View){
         }
     }
 
-    private fun fetchSpecificQuiz(key: String, value: Boolean, textView: TextView?, quizList : MutableList<QuizModel>) {
+    private fun fetchSpecificQuiz(key: String, value: String, textView: TextView?, quizList : MutableList<QuizModel>) {
         val firestore = FirebaseFirestore.getInstance()
-        val collectionRef = firestore.collection("/users/G897SE6IwSfSgpqiISIGNCBmSrI3/history")
+        val collectionRef = firestore.collection("/users/$user_id/history")
 
         collectionRef.whereEqualTo(key, value)
                 .get()
@@ -368,6 +364,7 @@ private fun init(view: View){
                         val quizModel = document.toObject(QuizModel::class.java)
                         quizList.add(quizModel!!)
                     }
+
                     // Perform further operations with the quizList containing the documents
                     Toast.makeText(requireContext(),quizList.size.toString(),Toast.LENGTH_LONG).show()
                     textView?.text = quizList.size.toString()
@@ -416,39 +413,7 @@ private fun init(view: View){
         return randomItems
     }
 
+
 }
 
-fun filterAttemptedQuizzes(key: String, value: Boolean): String {
-    val firebaseAuth: FirebaseAuth = FirebaseAuth.getInstance()
-    val user_id: String? = firebaseAuth.currentUser?.uid
-
-    val firestore = FirebaseFirestore.getInstance()
-    val collectionPath = "/users/$user_id/history"
-    val collectionRef = firestore.collection(collectionPath)
-
-    val allQuizList = mutableListOf<QuizModel>()
-    val attemptedQuizList = mutableListOf<QuizModel>()
-
-
-    collectionRef.get().addOnSuccessListener { querySnapshot ->
-        for (document in querySnapshot.documents) {
-            val documentId = document.id
-            // Skip if the document ID is already present in quizList_A
-            if (allQuizList.none { it.questionId == documentId }) {
-                val quizModel = QuizModel(questionId = documentId)
-                allQuizList.add(quizModel)
-            }
-        }
-    }.addOnFailureListener { exception ->
-        Log.e(TAG, "Error getting documents for path_A: $exception")
-    }
-    attemptedQuizList.clear() // Clear the existing attempted quizzes
-
-    for (quiz in allQuizList) {
-        if (quiz.attempted == value) {
-            attemptedQuizList.add(quiz)
-        }
-    }
-    return attemptedQuizList.size.toString()
-}
 
