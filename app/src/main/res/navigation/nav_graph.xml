@@ -178,7 +178,11 @@
         android:id="@+id/quizFragment"
         android:name="com.codingstuff.quizzyapp.views.QuizFragment"
         android:label="fragment_quiz2"
-        tools:layout="@layout/fragment_quiz2" />
+        tools:layout="@layout/fragment_quiz2" >
+        <action
+            android:id="@+id/action_quizFragment_to_studyFragment"
+            app:destination="@id/studyFragment" />
+    </fragment>
     <fragment
         android:id="@+id/helpFragment"
         android:name="com.codingstuff.quizzyapp.views.HelpFragment"
@@ -208,4 +212,9 @@
             android:id="@+id/action_buildYourOwnQuestionDialog_to_quizFragment2"
             app:destination="@id/quizFragment" />
     </fragment>
+    <fragment
+        android:id="@+id/admin_Fragment"
+        android:name="com.codingstuff.quizzyapp.views.Admin_Fragment"
+        android:label="fragment_admin_"
+        tools:layout="@layout/fragment_admin_" />
 </navigation>

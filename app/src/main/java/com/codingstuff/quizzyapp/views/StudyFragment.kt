@@ -18,32 +18,48 @@ import android.widget.ProgressBar
 import android.widget.SeekBar
 import android.widget.TextView
 import android.widget.Toast
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.navigation.NavController
 import androidx.navigation.Navigation
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.codingstuff.quizzyapp.Adapter.Calendar_QotD_Adapter
 import com.codingstuff.quizzyapp.CalendarAdapter
+import com.codingstuff.quizzyapp.Model.CalenderModel
 import com.codingstuff.quizzyapp.Model.DomainModel
 import com.codingstuff.quizzyapp.Model.QuizModel
 import com.codingstuff.quizzyapp.R
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ListenerRegistration
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 
 class StudyFragment : Fragment() {
+     var no_of_streaks = 0
+    lateinit var calendarAdapter: CalendarAdapter
+    lateinit var calendar_QotD_Adapter: Calendar_QotD_Adapter
+    private var listenerRegistration: ListenerRegistration? = null
+    private var listenerRegistration_dom: ListenerRegistration? = null
+    private var listenerRegistration_QotD_cal: ListenerRegistration? = null
+
     private var currentDate: Date = Date()
+    var highlightedDates: MutableList<String> = mutableListOf()
+    val dateList: MutableList<CalenderModel> = mutableListOf()
+    val docsList: MutableList<String> = mutableListOf()
+    val docs_QotD_List: MutableList<String> = mutableListOf()
+
 
     var domainId_d: String? = null
     var domain_name_d: String? = null
     var correct_d: String? = null
-    var incorrect_d : String? = null
-    var totalQuiz_d : String? = null
-    var progress_percentage_d : String? = null
+    var incorrect_d: String? = null
+    var totalQuiz_d: String? = null
+    var progress_percentage_d: String? = null
 
     val firebaseAuth: FirebaseAuth = FirebaseAuth.getInstance()
     val user_id: String? = firebaseAuth.currentUser?.uid
@@ -59,8 +75,19 @@ class StudyFragment : Fragment() {
     var qotd_quiz: MutableList<QuizModel> = mutableListOf()
     var no_of_Domains: Int = 0
 
+    lateinit var tv_streak: TextView
+    lateinit var tv_allStudying_btn: TextView
+    lateinit var tv_QotD_btn: TextView
+    lateinit var tv_studied_updates_QotD: TextView
+    lateinit var img_studied_QotD: ImageView
+    lateinit var btn_tv_hide_QotD: ImageView
+    lateinit var btn_tv_show_QotD: ImageView
+    lateinit var rv_QotD_calendarView: RecyclerView
+
     lateinit var tv_studied_updates: TextView
+    lateinit var tv_greeting: TextView
     lateinit var add_quiz_to_db: TextView
+    lateinit var tv_sub_greeting: TextView
     lateinit var btn_update_exiting_quiz: TextView
     lateinit var img_studied: ImageView
     lateinit var btn_tv_hide: ImageView
@@ -74,6 +101,8 @@ class StudyFragment : Fragment() {
     lateinit var ll_btn_timed_quiz: LinearLayout
     lateinit var ll_btn_weakest_subject_quiz: LinearLayout
     lateinit var ll_btn_quick_10_quiz: LinearLayout
+    lateinit var ll_all_studying: LinearLayout
+    lateinit var ll_QotD: LinearLayout
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         refreshFragment()
@@ -90,8 +119,9 @@ class StudyFragment : Fragment() {
         val view = inflater.inflate(R.layout.fragment_study, container, false)
         refreshFragment()
 
-        init(view)
 
+        init(view)
+        getGreetingMsg()
         return view
     }
 
@@ -104,13 +134,48 @@ class StudyFragment : Fragment() {
             view.findViewById<LinearLayout>(R.id.ll_btn_weakest_subject_quiz)
         ll_btn_quick_10_quiz = view.findViewById<LinearLayout>(R.id.ll_btn_quick_10_quiz)
 //        val calendarView: CalendarView = view.findViewById<CalendarView>(R.id.calendar_view)
-        rv_calendarView = view.findViewById<RecyclerView>(R.id.calendar_view_rv)
+        rv_QotD_calendarView = view.findViewById<RecyclerView>(R.id.calendar_view_rv_QotD)
+        btn_tv_hide_QotD = view.findViewById<ImageView>(R.id.btn_tv_hide_QotD)
+        btn_tv_show_QotD = view.findViewById<ImageView>(R.id.btn_tv_show_QotD)
+        tv_studied_updates_QotD = view.findViewById<TextView>(R.id.tv_studied_updates_QotD)
+
         tv_studied_updates = view.findViewById<TextView>(R.id.tv_studied_updates)
+        tv_greeting = view.findViewById<TextView>(R.id.tv_greeting)
+        rv_calendarView = view.findViewById<RecyclerView>(R.id.calendar_view_rv)
         btn_tv_hide = view.findViewById<ImageView>(R.id.btn_tv_hide)
         btn_tv_show = view.findViewById<ImageView>(R.id.btn_tv_show)
-        add_quiz_to_db = view.findViewById<TextView>(R.id.tv_add_quiz)
+
+        tv_QotD_btn = view.findViewById<TextView>(R.id.tv_QotD_btn)
+        ll_QotD = view.findViewById<LinearLayout>(R.id.ll_QotD)
+
+        tv_allStudying_btn = view.findViewById<TextView>(R.id.tv_allStudying_btn)
+        ll_all_studying = view.findViewById<LinearLayout>(R.id.ll_all_studying)
+
+        add_quiz_to_db = view.findViewById<TextView>(R.id.tv_allStudying_btn)
+        tv_sub_greeting = view.findViewById<TextView>(R.id.tv_sub_greeting)
+
         btn_update_exiting_quiz = view.findViewById<TextView>(R.id.btn_update_exiting_quiz)
 
+        tv_streak = view.findViewById<TextView>(R.id.tv_streak)
+
+
+        //no_of_streaks = findLastConsecutiveDates(docs_QotD_List)
+        var msg: String
+        if (no_of_streaks > 1) {
+            msg = no_of_streaks.toString() + " days streak"
+        } else{
+            msg = no_of_streaks.toString() + " day streak"
+        }
+        tv_streak.text = msg
+
+        tv_greeting.text = setGreetingMessage()
+        rv_QotD_calendarView.layoutManager = GridLayoutManager(requireContext(), 7)
+        calendar_QotD_Adapter = Calendar_QotD_Adapter(requireContext())
+        rv_QotD_calendarView.adapter = calendar_QotD_Adapter
+
+        rv_calendarView.layoutManager = GridLayoutManager(requireContext(), 7)
+        calendarAdapter = CalendarAdapter(requireContext())
+        rv_calendarView.adapter = calendarAdapter
         //   refreshFragment()
         add_quiz_to_db.setOnClickListener(View.OnClickListener {
             add_quiz()
@@ -119,6 +184,7 @@ class StudyFragment : Fragment() {
             //removeAnyField()
             // update_multiple_fields()
             add_quiz()
+            //removeDocumentsWithNullQuestion()
             //moveToNewPath()
         })
 
@@ -136,12 +202,23 @@ class StudyFragment : Fragment() {
             btn_tv_hide.visibility = View.VISIBLE
 
         })
+        setupCalendarView()
 
-        setupCalendarView(rv_calendarView)
+        tv_QotD_btn.setOnClickListener {
+            ll_all_studying.visibility = View.GONE
+            ll_QotD.visibility = View.VISIBLE
+            tv_QotD_btn.setTextColor(ContextCompat.getColor(requireContext(), R.color.blue_font))
+            tv_allStudying_btn.setTextColor(ContextCompat.getColor(requireContext(), R.color.black))
+        }
+        tv_allStudying_btn.setOnClickListener {
+            ll_all_studying.visibility = View.VISIBLE
+            ll_QotD.visibility = View.GONE
+            tv_allStudying_btn.setTextColor(ContextCompat.getColor(requireContext(), R.color.blue_font))
+            tv_QotD_btn.setTextColor(ContextCompat.getColor(requireContext(), R.color.black))
+        }
         ll_btn_qotd.setOnClickListener {
             is_QotD_attempted()
         }
-
         ll_btn_build_quiz.setOnClickListener {
             navController!!.navigate(R.id.action_studyFragment_to_buildYourOwnQuestionDialog)
         }
@@ -152,7 +229,7 @@ class StudyFragment : Fragment() {
             openDialog(R.layout.select_quiz_time_dialog)
         }
         ll_btn_weakest_subject_quiz.setOnClickListener {
-smallest_Dom()
+            smallest_Dom()
             openDialog(R.layout.weakest_subject_quiz_dialog)
         }
         ll_btn_quick_10_quiz.setOnClickListener {
@@ -180,10 +257,11 @@ smallest_Dom()
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         navController = Navigation.findNavController(view)
+
     }
 
     private fun openDialog(dialogId: Int) {
-        if (domainId_d!=null)
+        if (domainId_d != null)
             fetch_weakest_quizList(domainId_d!!.toInt())
 
         val dialog = Dialog(requireContext())
@@ -280,7 +358,28 @@ smallest_Dom()
                 )
                 Log.e(TAG, "Error getting quiz documents: $weakestQuizListTesting")
 
-                 navController!!.navigate(R.id.action_studyFragment_to_quizFragment, bundle)
+                navController!!.navigate(R.id.action_studyFragment_to_quizFragment, bundle)
+                dialog.dismiss()
+            }
+        }
+
+        if (dialogId == (R.layout.quit_quiz_dialog)) {
+            val btnQuit: Button = dialog.findViewById(R.id.btn_quit)
+            val btnSubmitQuiz: Button = dialog.findViewById(R.id.btn_submit_quiz)
+            val btnContinue: Button = dialog.findViewById(R.id.btn_continue)
+
+            btnQuit.setOnClickListener {
+                // Dismiss the dialog
+                dialog.dismiss()
+                // Close the current fragment and go back to the previous one
+                activity?.supportFragmentManager?.popBackStack()
+            }
+            btnSubmitQuiz.setOnClickListener {
+                // Show a toast when the button is clicked
+                Toast.makeText(requireContext(), "Quiz Submitted", Toast.LENGTH_SHORT).show()
+            }
+            btnContinue.setOnClickListener {
+                // Only dismiss the dialog
                 dialog.dismiss()
             }
         }
@@ -304,7 +403,6 @@ smallest_Dom()
                 ) {
                     // Update tv_num_of_ques with the new progress value
                     tv_num_of_ques.text = progress.toString()
-
                 }
 
                 override fun onStartTrackingTouch(seekBar: SeekBar?) {
@@ -333,7 +431,7 @@ smallest_Dom()
     }
 
     fun getRandomQuestions() {
-        val collectionPath = "/Exams/ComputerScience/Questions"
+        val collectionPath = "/Exams/computer_science/Questions"
         val collectionRef = firestore.collection(collectionPath)
 
         collectionRef.get().addOnSuccessListener { querySnapshot ->
@@ -350,7 +448,7 @@ smallest_Dom()
     }
 
     fun getRandomQuestionsTesting() {
-        val collectionPath = "/Exams/ComputerScience/Questions"
+        val collectionPath = "/Exams/computer_science/Questions"
         val collectionPath_2 = "/users/$user_id/history"
         val collectionRef = firestore.collection(collectionPath)
         val collectionRef_2 = firestore.collection(collectionPath_2)
@@ -390,54 +488,33 @@ smallest_Dom()
         }
     }
 
-    private lateinit var calendarAdapter: CalendarAdapter
 
-    private fun setupCalendarView(calendarView: RecyclerView) {
-        currentDate = Date()
+    private fun setupCalendarView() {
+        calendarAdapter.setDates(setup_calDates())
+        calendarAdapter.setHighlightDate(docsList)
+        calendarAdapter.notifyDataSetChanged()
+    }
 
-        calendarView.layoutManager = GridLayoutManager(requireContext(), 7)
-        calendarAdapter = CalendarAdapter(requireContext())
-        calendarView.adapter = calendarAdapter
+    private fun setup_QotD_CalendarView() {
+        calendar_QotD_Adapter.setDates(setup_calDates())
+        calendar_QotD_Adapter.setHighlightDate(docs_QotD_List)
+        calendar_QotD_Adapter.notifyDataSetChanged()
+    }
 
-        // Get the current date
+    private fun setup_calDates(): MutableList<Date> {
+
         val calendar: Calendar = Calendar.getInstance()
-
-        // Set the calendar to the first day of the current month
-        calendar.set(Calendar.DAY_OF_MONTH, 1)
-
-        // Find the day of the week for the first day of the month (e.g., Sunday = 1, Monday = 2, etc.)
-        val firstDayOfWeek = calendar.get(Calendar.DAY_OF_WEEK)
-
-        // Calculate the number of days to subtract to align with the desired starting day (e.g., Sunday = 1, Monday = 2, etc.)
-        val daysToSubtract =
-            if (firstDayOfWeek > Calendar.SUNDAY) firstDayOfWeek - Calendar.SUNDAY else 7
-
-        // Store the current date in the currentDate variable
-
-
-        // Calculate the start and end dates for two weeks
-        val startDate: Date = calendar.time
-        calendar.add(Calendar.DAY_OF_YEAR, 13)
-        val endDate: Date = calendar.time
-
-        // Generate a list of dates for two weeks (up to 14 dates)
+        val currentDate = calendar.time
+        val endDate = currentDate.time // End date is the current date
+        calendar.add(Calendar.DAY_OF_MONTH, -13) // Subtract 13 days from the current date
+        val startDate = calendar.time // Start date is 13 days before the current date
         val dateList: MutableList<Date> = mutableListOf()
-        val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
-        var currentDate_long =
-            startDate.time - (daysToSubtract * 86400000) // Subtract the days to align with the starting day
-        var count = 0
-        while (count < 14 && currentDate_long <= endDate.time) {
+        var currentDate_long = startDate.time
+        repeat(14) {
             dateList.add(Date(currentDate_long))
             currentDate_long += 86400000 // Add one day in milliseconds
-            count++
         }
-
-        // Set the dates in the adapter
-        calendarAdapter.setDates(dateList)
-        // Set the dates in the adapter and update the UI
-        calendarAdapter.setDates(dateList)
-        calendarAdapter.setCurrentDate(currentDate)
-        calendarAdapter.notifyDataSetChanged()
+        return dateList
     }
 
     fun add_quiz() {
@@ -454,11 +531,19 @@ smallest_Dom()
             option_d = "Option D",
             domain = "4",
             domain_name = "Domain D 4",
-            subject = "Computer Science"
+            subject = "Computer Science",
+
+            /*       date = "22-07-2023",
+                   attempted = "true",
+                   correct = "false",
+                   flagged = "",
+                   quizCat = "QotD",
+                   select_opt = "Option B"*/
 
         )
 
-        val collectionPath = "/Exams/ComputerScience/Questions"
+        val collectionPath = "/Exams/computer_science/Questions"
+        //  val collectionPath = "/users/$user_id/history_of_QotD"
 
         val collectionRef = firestore.collection(collectionPath)
         collectionRef.add(quizModel)
@@ -508,39 +593,16 @@ smallest_Dom()
             }
     }
 
-/*
-    fun fetch_weakest_quizList(value: Int) {
-        var quizList: MutableList<QuizModel> = mutableListOf()
-        val firestore = FirebaseFirestore.getInstance()
-        val collectionRef: CollectionReference
-
-        collectionRef = firestore.collection("/users/$user_id/history")
-
-        collectionRef.whereEqualTo("domain", value.toString()).whereEqualTo("correct","false")
-            .get()
-            .addOnSuccessListener { querySnapshot ->
-                for (document in querySnapshot.documents) {
-                    val quizModel = document.toObject(QuizModel::class.java)
-                    quizList.add(quizModel!!)
-                }
-                weakestQuizListTesting = quizList
-            }
-            .addOnFailureListener { exception ->
-                // Handle the error
-                Log.e(ContentValues.TAG, "Error fetching documents: $exception")
-            }
-    }
-*/
 
     fun fetch_QotD(currentDate: String) {
         var quizList: MutableList<QuizModel> = mutableListOf()
         val firestore = FirebaseFirestore.getInstance()
         val collectionRef: CollectionReference
 
-        collectionRef = firestore.collection("/Exams/ComputerScience/Question_Of_The_Day")
+        collectionRef = firestore.collection("/Exams/computer_science/Question_Of_The_Day")
 
-        collectionRef.whereGreaterThanOrEqualTo("date", "$currentDate, 00:00:00")
-            .whereLessThanOrEqualTo("date", "$currentDate, 23:59:59")
+        collectionRef.whereGreaterThanOrEqualTo("date", "$currentDate")
+            .whereLessThanOrEqualTo("date", "$currentDate")
             .get()
             .addOnSuccessListener { querySnapshot ->
                 if (!querySnapshot.isEmpty) {
@@ -572,25 +634,26 @@ smallest_Dom()
             }
     }
 
-fun dom_tst(){
-    val collectionPath = "/Exams/ComputerScience/Domains"
-    val collectionRef = firestore.collection(collectionPath)
+    fun dom_tst() {
+        val collectionPath = "/Exams/computer_science/Domains"
+        val collectionRef = firestore.collection(collectionPath)
 
-    collectionRef.get()
-        .addOnSuccessListener { querySnapshot ->
-            for (document in querySnapshot.documents) {
-                // Process each document here
-                val documentId = document.id
-                fetch_domains_list("domain", documentId.toString())
+        collectionRef.get()
+            .addOnSuccessListener { querySnapshot ->
+                for (document in querySnapshot.documents) {
+                    // Process each document here
+                    val documentId = document.id
+                    fetch_domains_list("domain", documentId.toString())
 
-                no_of_Domains++
+                    no_of_Domains++
+                }
+
             }
+            .addOnFailureListener { exception ->
+                Log.e(TAG, "Error getting documents: $exception")
+            }
+    }
 
-        }
-        .addOnFailureListener { exception ->
-            Log.e(TAG, "Error getting documents: $exception")
-        }
-}
     fun fetch_weakest_quizList(value: Int) {
         var quizList: MutableList<QuizModel> = mutableListOf()
         val firestore = FirebaseFirestore.getInstance()
@@ -598,16 +661,16 @@ fun dom_tst(){
 
         collectionRef = firestore.collection("/users/$user_id/history")
 
-        collectionRef.whereEqualTo("domain", value.toString()).whereEqualTo("correct","false")
+        collectionRef.whereEqualTo("domain", value.toString()).whereEqualTo("correct", "false")
             .get()
             .addOnSuccessListener { querySnapshot ->
                 for (document in querySnapshot.documents) {
                     val quizModel = document.toObject(QuizModel::class.java)
                     quizList.add(quizModel!!)
                 }
-                if(quizList.isNotEmpty()){
-                weakestQuizListTesting = quizList
-            }else{
+                if (quizList.isNotEmpty()) {
+                    weakestQuizListTesting = quizList
+                } else {
                     Toast.makeText(
                         context,
                         "Congrats\nNo Weak subject",
@@ -622,18 +685,6 @@ fun dom_tst(){
             }
     }
 
-    fun weatestList_test(){
-        if (domainsList.isNotEmpty()) {
-            smallestDomainModel = domainsList.minByOrNull {
-                it.progress_percentage?.toDoubleOrNull() ?: Double.MAX_VALUE
-            }
-            /*  val domainId = smallestDomainModel?.domainId
-
-              if (domainId!=null)fetch_weakest_quizList(domainId.toInt())
-*/
-        }
-
-    }
     fun get_totalQuizList(domains: Int) {
 
         for (i in 1 until domains) {
@@ -670,7 +721,6 @@ fun dom_tst(){
                     if (incor_quiz_weakest_sub_list.size != 0) {
                         dom_name = incor_quiz_weakest_sub_list.get(0).domain_name
                     }
-
                     perc = ((correct.toDouble() / totalQuiz.toDouble()) * 100).toInt()
                     val domainModel = DomainModel(
                         domainId = value.toString(),
@@ -681,17 +731,12 @@ fun dom_tst(){
                         progress_percentage = perc.toString()
                     )
                     domainsList.add(domainModel)
-
                 }
-
-
             }
             .addOnFailureListener { exception ->
                 // Handle the error
                 Log.e(ContentValues.TAG, "Error fetching documents: $exception")
             }
-
-
     }
 
     fun is_QotD_attempted() {
@@ -717,12 +762,9 @@ fun dom_tst(){
                         "You already have attempted\nthe today's Quiz",
                         Toast.LENGTH_LONG
                     ).show()
-
-                    Log.d(TAG, "quiz_QotD is set to true for today's date.")
                 } else {
                     quiz_QotD = "false"
                     fetch_QotD(currentDate)
-
                 }
             }
             .addOnFailureListener { exception ->
@@ -732,7 +774,10 @@ fun dom_tst(){
 
     fun refreshFragment() {
         dom_tst()
+        getAll_dom()
         fetch_missed_QuizList("correct", "false", "MISSED_QUIZ")
+        get_studied_dates()
+        get_QotD_studied_dates()
         getRandomQuestionsTesting()
     }
 
@@ -741,9 +786,9 @@ fun dom_tst(){
             smallestDomainModel = domainsList.minByOrNull {
                 it.progress_percentage?.toDoubleOrNull() ?: Double.MAX_VALUE
             }
-            domainId_d= smallestDomainModel?.domainId
-            domain_name_d= smallestDomainModel?.domain_name
-            correct_d= smallestDomainModel?.correct
+            domainId_d = smallestDomainModel?.domainId
+            domain_name_d = smallestDomainModel?.domain_name
+            correct_d = smallestDomainModel?.correct
             incorrect_d = smallestDomainModel?.incorrect
             totalQuiz_d = smallestDomainModel?.totalQuiz
             progress_percentage_d = smallestDomainModel?.progress_percentage
@@ -752,10 +797,228 @@ fun dom_tst(){
 
     }
 
+    private fun generateDateList(formattedStartDate: String, formattedEndDate: String) {
+        val dateFormat = SimpleDateFormat("dd-MM-yyyy", Locale.getDefault())
+
+        val startDate: Date = dateFormat.parse(formattedStartDate)!!
+        val endDate: Date = dateFormat.parse(formattedEndDate)!!
+
+        val calendar = Calendar.getInstance()
+        calendar.time = startDate
+
+        while (!calendar.time.after(endDate)) {
+            val date: String? = dateFormat.format(calendar.time)
+            val calenderModel = CalenderModel(
+                date = date
+            )
+            dateList.add(calenderModel)
+            calendar.add(Calendar.DAY_OF_MONTH, 1)
+        }
+    }
+
+    fun get_studied_dates() {
+        val path = "/users/$user_id/days_studied"
+
+        val firestore = FirebaseFirestore.getInstance()
+        val collectionRef = firestore.collection(path)
+        listenerRegistration = collectionRef.addSnapshotListener { documentSnapshot, e ->
+            if (e != null) {
+                // Handle the error
+                Log.e("Firestore", "Error fetching documents: $e")
+                return@addSnapshotListener
+            }
+            docsList.clear()
+
+            for (document in documentSnapshot?.documents ?: emptyList()) {
+                val documentId = document.id
+                docsList.add(documentId)
+            }
+            // calendarAdapter.notifyDataSetChanged()
+            setupCalendarView()
+        }
+    }
+
+    fun get_QotD_studied_dates() {
+        val path = "/users/$user_id/history_of_QotD"
+
+        val firestore = FirebaseFirestore.getInstance()
+        val collectionRef = firestore.collection(path)
+        listenerRegistration_QotD_cal = collectionRef.addSnapshotListener { querySnapshot, e ->
+            if (e != null) {
+                // Handle the error
+                Log.e("Firestore", "Error fetching documents: $e")
+                return@addSnapshotListener
+            }
+            docs_QotD_List.clear()
+            for (document in querySnapshot?.documents ?: emptyList()) {
+                val date = document.getString("date")
+                if (date != null) {
+                    docs_QotD_List.add(date)
+                }
+            }
+            // Notify the adapter or update UI here if needed
+            // calendarAdapter.notifyDataSetChanged()
+            setup_QotD_CalendarView()
+            find_streak_all_studied(docs_QotD_List)
+//            no_of_streaks = findLastConsecutiveDates(docs_QotD_List)
+
+        }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        startFirestoreListener()
+    }
+
+    override fun onStop() {
+        super.onStop()
+        stopFirestoreListener()
+    }
+
+    private fun startFirestoreListener() {
+        refreshFragment()
+    }
+
+    private fun stopFirestoreListener() {
+        listenerRegistration?.remove()
+        listenerRegistration_dom?.remove()
+        listenerRegistration_QotD_cal?.remove()
+        listenerRegistration = null
+        listenerRegistration_dom = null
+        listenerRegistration_QotD_cal = null
+    }
+
     override fun onResume() {
         super.onResume()
         domainsList.clear()
         refreshFragment()
+
+    }
+
+    private fun setGreetingMessage() : String {
+        val currentHour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
+
+        val greetingMessage = when (currentHour) {
+            in 0..11 -> "Good Morning"
+            in 12..16 -> "Good Afternoon"
+            else -> "Good Evening"
+        }
+
+        return greetingMessage
+    }
+    private fun getAll_dom() {
+        val collectionRef = firestore.collection("/Exams/ComputerScience/Domains")
+
+        // Add a snapshot listener to the collection reference
+       listenerRegistration_dom = collectionRef.addSnapshotListener { querySnapshot, error ->
+            if (error != null) {
+                // Handle the error
+                Log.e(TAG, "Error getting quizzes: $error")
+                return@addSnapshotListener
+            }
+
+            // Clear the existing list of quizzes
+            val dom_List: MutableList<DomainModel> = mutableListOf()
+
+            // Process the documents in the snapshot
+            for (document in querySnapshot!!.documents) {
+                // Convert each document to a QuizModel object and add it to the list
+                val domModel = document.toObject(DomainModel::class.java)
+
+                domModel?.let {
+                    dom_List.add(it)
+                }
+
+            }
+           // Now you have all the quizzes in the quizList
+            // You can do whatever you want with the list here, e.g., update UI, perform calculations, etc.
+        }
+    }
+
+
+    private fun getGreetingMsg() {
+        val docRef = firestore.document("/Exams/Greating_Msgs")
+
+        docRef.get()
+            .addOnSuccessListener { documentSnapshot ->
+                if (documentSnapshot.exists()) {
+                    // Document exists, retrieve the value of the "msg" field
+                    val msgValue = documentSnapshot.getString("msg")
+                    if (msgValue != null) {
+                        // Use the value of the "msg" field
+                        Log.d("Firestore", "Message: $msgValue")
+                        tv_sub_greeting.text = msgValue
+                    } else {
+                        Log.d("Firestore", "Message field is null")
+                    }
+                } else {
+                    Log.d("Firestore", "Document does not exist")
+                }
+            }
+            .addOnFailureListener { exception ->
+                // Handle the error while fetching the document
+                Log.e("Firestore", "Error fetching document: ${docRef.path}", exception)
+            }
+    }
+
+    fun find_streak_all_studied(datesList: List<String>) {
+/*
+        if (datesList.isEmpty()) {
+            return 0
+        }
+*/
+
+        val dateFormat = SimpleDateFormat("dd-MM-yyyy, HH:mm:ss", Locale.getDefault())
+        val dateObjectsList = datesList.mapNotNull { dateString ->
+            try {
+                dateFormat.parse(dateString)
+            } catch (e: Exception) {
+                null
+            }
+        }.sorted()
+
+        var maxConsecutiveDates = 1
+        var currentConsecutiveDates = 1
+
+        for (i in 1 until dateObjectsList.size) {
+            val currentDate = dateObjectsList[i]
+            val previousDate = dateObjectsList[i - 1]
+            val diffInDays = ((currentDate.time - previousDate.time) / (1000 * 60 * 60 * 24)).toInt()
+
+            if (diffInDays == 1) {
+                currentConsecutiveDates++
+                if (currentConsecutiveDates > maxConsecutiveDates) {
+                    maxConsecutiveDates = currentConsecutiveDates
+                }
+            } else {
+                currentConsecutiveDates = 1
+            }
+        }
+        var msg: String
+        var msg1: String
+        var msg2: String
+        var msg3: String
+
+        if (maxConsecutiveDates > 1) {
+            msg = maxConsecutiveDates.toString() + " days streak"
+            msg2 = "You have ${maxConsecutiveDates} days study streak"
+        } else{
+            msg = maxConsecutiveDates.toString() + " day streak"
+            msg2 = "You have ${maxConsecutiveDates} day study streak"
+        }
+        val calendar = Calendar.getInstance()
+        val date_Format = SimpleDateFormat("MMMM dd", Locale.getDefault())
+        val strDate = date_Format.format(calendar.time)
+        tv_streak.text = msg
+
+        if (dateList.size>1){
+            msg1 = "You have Studied ${datesList.size} days since ${datesList.get(0).substring(0,11)}."
+        }else{
+            msg1 = "You have Studied ${datesList.size} day since ${datesList.get(0).substring(0,11)}."
+        }
+        tv_studied_updates.text = "Today is $strDate. $msg1 $msg2"
+
+//        return maxConsecutiveDates
     }
 
 }

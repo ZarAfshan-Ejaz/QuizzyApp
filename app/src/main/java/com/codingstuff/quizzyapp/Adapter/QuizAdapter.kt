@@ -26,8 +26,11 @@ class QuizAdapter(private val quizList: List<QuizModel>, quizCat:String?, contex
      var pre_Poss : Int = 0
     val context =context
     val quizCat = quizCat
+
+
     inner class QuizViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         // Initialize views in the item layout
+
         val tv_question: TextView = itemView.findViewById(R.id.tv_question)
         val tv_question_no: TextView = itemView.findViewById(R.id.tv_question_no)
 
@@ -43,13 +46,33 @@ class QuizAdapter(private val quizList: List<QuizModel>, quizCat:String?, contex
         val tv_op_d: TextView = itemView.findViewById(R.id.tv_op_d)
         val img_res_op_d: ImageView =itemView.findViewById(R.id.img_res_op_d)
 
-        val tv_corr_ans: TextView =itemView.findViewById(R.id.tv_corr_ans)
-        val ll_corr_ans: LinearLayout = itemView.findViewById(R.id.ll_corr_ans)
+       // val tv_corr_ans: TextView =itemView.findViewById(R.id.tv_corr_ans)
+       // val ll_corr_ans: LinearLayout = itemView.findViewById(R.id.ll_corr_ans)
 
         val ll_main_op_a: LinearLayout = itemView.findViewById(R.id.ll_main_op_a)
         val ll_main_op_b: LinearLayout = itemView.findViewById(R.id.ll_main_op_b)
         val ll_main_op_c: LinearLayout = itemView.findViewById(R.id.ll_main_op_c)
         val ll_main_op_d: LinearLayout = itemView.findViewById(R.id.ll_main_op_d)
+
+        var tvHide_a: TextView = itemView.findViewById(R.id.tv_hide_a)
+        var tvShow_a: TextView = itemView.findViewById(R.id.tv_show_a)
+        var tvAnswer_a: TextView = itemView.findViewById(R.id.tv_answer_a)
+        var ll_ans_a: LinearLayout = itemView.findViewById(R.id.ll_ans_a)
+
+        var tvHide_b: TextView = itemView.findViewById(R.id.tv_hide_b)
+        var tvShow_b: TextView = itemView.findViewById(R.id.tv_show_b)
+        var tvAnswer_b: TextView = itemView.findViewById(R.id.tv_answer_b)
+        var ll_ans_b: LinearLayout = itemView.findViewById(R.id.ll_ans_b)
+
+        var tvHide_c: TextView = itemView.findViewById(R.id.tv_hide_c)
+        var tvShow_c: TextView = itemView.findViewById(R.id.tv_show_c)
+        var tvAnswer_c: TextView = itemView.findViewById(R.id.tv_answer_c)
+        var ll_ans_c: LinearLayout = itemView.findViewById(R.id.ll_ans_c)
+
+        var tvHide_d: TextView = itemView.findViewById(R.id.tv_hide_d)
+        var tvShow_d: TextView = itemView.findViewById(R.id.tv_show_d)
+        var tvAnswer_d: TextView = itemView.findViewById(R.id.tv_answer_d)
+        var ll_ans_d: LinearLayout = itemView.findViewById(R.id.ll_ans_d)
 
 
         // val answerTextView: TextView = itemView.findViewById(R.id.answerTextView)
@@ -70,7 +93,7 @@ class QuizAdapter(private val quizList: List<QuizModel>, quizCat:String?, contex
             holder.img_res_op_b.visibility = View.GONE
             holder.img_res_op_c.visibility = View.GONE
             holder.img_res_op_d.visibility = View.GONE
-            holder.ll_corr_ans.visibility = View.GONE
+           // holder.ll_corr_ans.visibility = View.GONE
 
         }
 
@@ -93,20 +116,20 @@ class QuizAdapter(private val quizList: List<QuizModel>, quizCat:String?, contex
 
         holder.ll_main_op_a.setOnClickListener(View.OnClickListener {
             pre_Poss = position
-            answerSelected(holder,holder.img_res_op_a,corr_opt,holder.tv_op_a.text.toString(),reason,holder.img_res_op_a, "","true")
+            answerSelected(holder.ll_main_op_a,holder,holder.img_res_op_a,corr_opt,holder.tv_op_a.text.toString(),reason,holder.img_res_op_a, "","true")
         })
         holder.ll_main_op_b.setOnClickListener(View.OnClickListener {
             pre_Poss = position
-            answerSelected(holder,holder.img_res_op_b,corr_opt,holder.tv_op_b.text.toString(),reason,holder.img_res_op_b, "","true")
+            answerSelected(holder.ll_main_op_b,holder,holder.img_res_op_b,corr_opt,holder.tv_op_b.text.toString(),reason,holder.img_res_op_b, "","true")
 
         })
         holder.ll_main_op_c.setOnClickListener(View.OnClickListener {
             pre_Poss = position
-            answerSelected(holder,holder.img_res_op_c,corr_opt,holder.tv_op_c.text.toString(),reason,holder.img_res_op_c, "","true")
+            answerSelected(holder.ll_main_op_c,holder,holder.img_res_op_c,corr_opt,holder.tv_op_c.text.toString(),reason,holder.img_res_op_c, "","true")
         })
         holder.ll_main_op_d.setOnClickListener(View.OnClickListener {
             pre_Poss = position
-            answerSelected(holder,holder.img_res_op_d,corr_opt,holder.tv_op_d.text.toString(),reason,holder.img_res_op_d, "","true")
+            answerSelected(holder.ll_main_op_d,holder,holder.img_res_op_d,corr_opt,holder.tv_op_d.text.toString(),reason,holder.img_res_op_d, "","true")
         })
 
 
@@ -178,6 +201,7 @@ class QuizAdapter(private val quizList: List<QuizModel>, quizCat:String?, contex
     }
 
   fun answerSelected(
+      ll_option: LinearLayout,
           holder: QuizViewHolder,
           img_res : ImageView,
           answer:String?,
@@ -190,20 +214,37 @@ class QuizAdapter(private val quizList: List<QuizModel>, quizCat:String?, contex
   ){
     val correct:String
 
-    holder.ll_corr_ans.visibility = View.VISIBLE
-    holder.tv_corr_ans.text = "Answer :\n"+"$answer\n$reason"
+   // holder.ll_corr_ans.visibility = View.VISIBLE
+    //holder.tv_corr_ans.text = "Answer :\n"+"$answer\n$reason"
 
     if (selected_op == answer){
         img_res.visibility = View.VISIBLE
         img_res.setImageResource(R.drawable.right_mark)
-          correct = "true"
+        ll_option.setBackgroundResource(R.drawable.card_border_correct)
+
+        correct = "true"
 
       }else{
           img_wrng_right.visibility = View.VISIBLE
           img_wrng_right.setImageResource(R.drawable.close)
+          ll_option.setBackgroundResource(R.drawable.card_border_wrong)
+
+
         correct = "false"
 
     }
+      if (holder.tv_op_a.text.toString() == answer) {
+          showReason( holder.ll_main_op_a, holder.ll_ans_a, holder.tvHide_a,holder.tvShow_a,holder.tvAnswer_a,reason,answer )
+
+      } else if (holder.tv_op_b.text.toString() == answer) {
+          showReason( holder.ll_main_op_b, holder.ll_ans_b, holder.tvHide_b,holder.tvShow_b,holder.tvAnswer_b,reason,answer )
+
+      } else if (holder.tv_op_c.text.toString() == answer) {
+          showReason( holder.ll_main_op_c, holder.ll_ans_c, holder.tvHide_c,holder.tvShow_c,holder.tvAnswer_c,reason,answer )
+
+      } else if (holder.tv_op_d.text.toString() == answer) {
+          showReason( holder.ll_main_op_d, holder.ll_ans_d, holder.tvHide_d,holder.tvShow_d,holder.tvAnswer_d,reason,answer )
+      }
       freezTheResult(holder)
 
       val quizModelData = QuizModel(
@@ -241,11 +282,14 @@ class QuizAdapter(private val quizList: List<QuizModel>, quizCat:String?, contex
         val questionId = quizModel.questionId
         var collectionPath = ""
 
+/*
         if (quizModel.quizCat == "QotD"){
             collectionPath = "/users/$user_id/history_of_QotD/$questionId"
         }else{
             collectionPath = "/users/$user_id/history/$questionId"
         }
+*/
+        collectionPath = "/users/$user_id/temp_history/$questionId"
 
         val documentRef = fireStore.document(collectionPath)
         documentRef.set(quizModel)
@@ -262,6 +306,26 @@ class QuizAdapter(private val quizList: List<QuizModel>, quizCat:String?, contex
         return dateFormat.format(currentTime)
     }
 
+    fun showReason(ll_main: LinearLayout, ll_show: LinearLayout, tv_hide : TextView, tv_show : TextView, tv_answer : TextView, answer: String?, reason: String?){
+
+        ll_main.setBackgroundResource(R.drawable.card_border_correct)
+
+        ll_show.visibility = View.VISIBLE
+        tv_show.setOnClickListener {
+            tv_hide.visibility = View.VISIBLE
+            tv_show.visibility = View.GONE
+            tv_answer.text = "Right Answer :\n$answer"+ "\n\nReason :\n$reason"
+            tv_answer.visibility = View.VISIBLE
+
+        }
+
+        tv_hide.setOnClickListener {
+            tv_hide.visibility = View.GONE
+            tv_show.visibility = View.VISIBLE
+            tv_answer.visibility = View.GONE
+        }
+
+    }
 }
 
 

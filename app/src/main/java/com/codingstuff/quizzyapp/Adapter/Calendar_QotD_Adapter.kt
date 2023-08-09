@@ -1,4 +1,4 @@
-package com.codingstuff.quizzyapp
+package com.codingstuff.quizzyapp.Adapter
 import android.content.Context
 import android.graphics.Paint
 import android.util.Log
@@ -8,11 +8,12 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.codingstuff.quizzyapp.Model.CalenderModel
+import com.codingstuff.quizzyapp.R
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import java.text.SimpleDateFormat
 import java.util.*
-class CalendarAdapter(private val context: Context) : RecyclerView.Adapter<CalendarAdapter.DateViewHolder>() {
+class Calendar_QotD_Adapter(private val context: Context) : RecyclerView.Adapter<Calendar_QotD_Adapter.DateViewHolder>() {
     private val dates: MutableList<Date> = mutableListOf()
     val firebaseAuth: FirebaseAuth = FirebaseAuth.getInstance()
     val user_id: String? = firebaseAuth.currentUser?.uid
@@ -39,15 +40,6 @@ class CalendarAdapter(private val context: Context) : RecyclerView.Adapter<Calen
         } else {
             holder.textDayName.visibility = View.GONE
         }
-        // Check if the date is in the list of highlighted dates and apply the background accordingly
-/*
-        if (highlightedDates.contains(date)) {
-            holder.textDate.setBackgroundResource(R.drawable.circle_background)
-        } else {
-            holder.textDate.setBackgroundResource(0)
-        }
-
-*/
 
         val str_date = formatDateToString(datee)
         if ( docsList.contains(str_date)) {

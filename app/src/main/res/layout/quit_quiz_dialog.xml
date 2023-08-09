@@ -27,16 +27,17 @@
             android:textStyle="bold" />
 
         <TextView
-            android:id="@+id/tv_question"
+            android:id="@+id/tv_progress"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="20dp"
             android:gravity="center"
-            android:text="You have answered 5 of 10 questions on this Quick 10 Quiz."
+            android:text=""
             android:textColor="@color/gray"
             android:textSize="18sp" />
 
         <Button
+            android:id="@+id/btn_quit"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
@@ -51,6 +52,7 @@
             android:textColor="@color/white" />
 
         <Button
+            android:id="@+id/btn_submit_quiz"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
@@ -65,6 +67,7 @@
             android:textColor="@color/white" />
 
         <Button
+            android:id="@+id/btn_continue"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"

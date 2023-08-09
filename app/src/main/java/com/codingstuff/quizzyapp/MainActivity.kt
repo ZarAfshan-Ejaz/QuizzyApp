@@ -28,7 +28,8 @@ class MainActivity : BaseActivity() {
                 navController!!.navigate(R.id.reviewFragment)
                 return@setOnNavigationItemSelectedListener true
             } else if (itemId == R.id.menu_settings) {
-                navController!!.navigate(R.id.settingFragment)
+                //navController!!.navigate(R.id.settingFragment)
+                navController!!.navigate(R.id.admin_Fragment)
                 return@setOnNavigationItemSelectedListener true
             }
             false
